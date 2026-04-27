@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard · Categorías de Protección Ambiental · SIA · SEDEMA CDMX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Leaflet · Mapas interactivos -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<style>
+  :root{
+    /* Paleta oficial · Gobierno de la Ciudad de México */
+    --guinda:#9d2148;   /* Pantone 7420 C — institucional primario */
+    --dorado:#b28e5c;   /* Pantone 465 C — institucional primario */
+    --amarillo:#fdc60a;
+    --naranja:#f08217;
+    --marron:#ac6d14;
+    --rosa-claro:#f5aeb8;
+    --magenta:#d72f89;
+    --rojo:#e5074c;
+    --azul-claro:#73cae6;
+    --verde:#027a35;
+    --azul:#266cb4;
+    --gris:#55585a;
+    --violeta:#8F4889;
+    --crema:#fffdf0;
+
+    /* Mapeo funcional */
+    --bg:var(--crema);
+    --bg-2:#f8f4e0;
+    --bg-3:#f1ead4;
+    --ink:#2a2a2a;
+    --ink-2:var(--gris);
+    --muted:#8a8d8f;
+    --line:#d9d3c0;
+    --line-soft:#eae4cf;
+    --accent:var(--guinda);
+    --accent-2:var(--dorado);
+    --danger:var(--rojo);
+    --card:#ffffff;
+
+    /* Colores por grupo */
+    --bu:var(--verde);
+    --br:var(--marron);
+    --anpl:var(--naranja);
+    --anpf:var(--azul);
+    --legal:var(--violeta);
+
+    --shadow:0 1px 2px rgba(42,42,42,.04),0 4px 12px -6px rgba(42,42,42,.08);
+    --radius:4px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Roboto',sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1440px;margin:0 auto;padding:32px 28px 80px}
+
+  /* Banda institucional superior — logo oficial GCDMX · SEDEMA · SIA */
+  .logo-bar{width:100%;padding:8px 0 20px;border-bottom:1px solid var(--line-soft);margin-bottom:26px}
+  .logo-inst{display:block;height:62px;width:auto;max-width:100%;object-fit:contain;object-position:left center}
+  @media (max-width:1024px){ .logo-inst{height:54px} }
+  @media (max-width:640px){
+    .logo-bar{padding:4px 0 16px;margin-bottom:20px}
+    .logo-inst{height:44px;object-position:center}
+  }
+  @media (max-width:420px){ .logo-inst{height:36px} }
+
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:22px;border-bottom:2px solid var(--guinda);margin-bottom:22px}
+  .brand{display:flex;flex-direction:column;gap:6px;max-width:780px}
+  .eyebrow{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--guinda);font-weight:500}
+  h1{font-family:'Roboto',sans-serif;font-weight:900;font-size:40px;line-height:1.08;letter-spacing:-.02em;color:var(--ink);max-width:900px}
+  h1 em{font-style:normal;color:var(--guinda);font-weight:900}
+  .sub{color:var(--ink-2);margin-top:10px;font-size:15px;font-weight:400}
+  .meta{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--muted);text-align:right;letter-spacing:.05em;line-height:1.8}
+  .meta b{color:var(--guinda);font-weight:500}
+
+  .tabs{display:flex;gap:0;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:4px;margin-bottom:24px;overflow-x:auto;box-shadow:var(--shadow)}
+  .tab{flex:1;min-width:144px;padding:11px 12px;background:transparent;border:none;cursor:pointer;font-family:'Roboto',sans-serif;font-size:13px;color:var(--ink-2);border-radius:3px;transition:transform .18s,background .18s,box-shadow .18s,color .18s;display:flex;flex-direction:row;align-items:center;gap:11px;text-align:left;font-weight:500;position:relative}
+  .tab:hover{background:var(--bg-2);transform:translateY(-1px)}
+  .tab:hover .tab-icon{transform:scale(1.06)}
+  .tab:focus-visible{outline:2px solid var(--guinda);outline-offset:2px}
+  .tab.active{background:var(--guinda);color:var(--crema);box-shadow:0 2px 8px rgba(157,33,72,.25)}
+  .tab.active .tab-num{color:var(--crema);opacity:.88}
+  .tab.active .tab-icon{color:var(--crema)}
+  .tab-icon{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);transition:color .18s,transform .18s}
+  .tab-icon svg{width:100%;height:100%}
+  .tab-content{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+  .tab-name{font-weight:700;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tab-num{font-family:'Roboto Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.06em;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* Color del icono por grupo cuando inactivo, da identidad visual */
+  .tab[data-id="ALL"]:not(.active) .tab-icon{color:var(--guinda)}
+  .tab[data-id="BU"]:not(.active) .tab-icon{color:#027a35}
+  .tab[data-id="BR"]:not(.active) .tab-icon{color:#ac6d14}
+  .tab[data-id="ANPL"]:not(.active) .tab-icon{color:#9d2148}
+  .tab[data-id="ANPF"]:not(.active) .tab-icon{color:#266cb4}
+  .tab[data-id="ANALISIS"]:not(.active) .tab-icon{color:var(--dorado)}
+  .tab[data-id="METAS"]:not(.active) .tab-icon{color:var(--guinda)}
+  .tab[data-id="LEGAL"]:not(.active) .tab-icon{color:var(--legal)}
+  /* Estados activos por grupo (mantienen los originales) */
+  .tab[data-id="BU"].active{background:var(--bu);color:var(--crema)}
+  .tab[data-id="BR"].active{background:var(--br);color:var(--crema)}
+  .tab[data-id="ANPL"].active{background:var(--anpl);color:var(--ink)}
+  .tab[data-id="ANPL"].active .tab-num{color:var(--ink);opacity:.75}
+  .tab[data-id="ANPL"].active .tab-icon{color:var(--ink)}
+  .tab[data-id="ANPF"].active{background:var(--anpf);color:var(--crema)}
+  .tab[data-id="METAS"].active{background:var(--guinda);color:var(--crema)}
+  .tab[data-id="LEGAL"].active{background:var(--legal);color:var(--crema)}
+
+  .panel{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:26px 28px;margin-bottom:20px;box-shadow:var(--shadow)}
+  .panel-title{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--guinda);margin-bottom:10px;font-weight:500}
+  .panel h3{font-family:'Roboto',sans-serif;font-size:26px;font-weight:700;line-height:1.2;margin-bottom:6px;letter-spacing:-.01em}
+  .panel h3 em{font-style:normal;color:var(--guinda);font-weight:900}
+  .panel-intro{color:var(--ink-2);font-size:14px;margin-top:8px;margin-bottom:20px;max-width:760px;line-height:1.6}
+
+  .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .hero-card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:20px 22px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+  .hero-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--guinda)}
+  .hero-card.bu::before{background:var(--bu)}
+  .hero-card.br::before{background:var(--br)}
+  .hero-card.anpl::before{background:var(--anpl)}
+  .hero-card.anpf::before{background:var(--anpf)}
+  .hero-label{font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:500}
+  .hero-value{font-family:'Roboto',sans-serif;font-size:42px;line-height:1;color:var(--ink);font-weight:900;letter-spacing:-.02em}
+  .hero-value .u{font-size:14px;color:var(--muted);margin-left:6px;font-weight:500;letter-spacing:0}
+  .hero-sub{font-size:12.5px;color:var(--muted);margin-top:8px;font-family:'Roboto Mono',monospace;letter-spacing:.04em}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+  .mini{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+          
+  /* Paneles compactos — menor padding, sin h3 */
+  .panel-compact{padding:18px 22px}
+  .panel-compact .panel-title{margin-bottom:8px}
+
+  /* Separación entre tabla y mapa cartográfico */
+  #globalMapSection{display:block;margin-top:28px}
+  #globalMapSection > .panel{margin-bottom:0}
+  .panel-compact h3{font-size:22px;margin-bottom:10px}
+
+  /* Tabla compacta de hitos — reemplaza grid de tarjetas */
+  .hitos-table{width:100%;border-collapse:collapse;margin-top:6px}
+  .hitos-table tr{border-bottom:1px dotted var(--line-soft)}
+  .hitos-table tr:last-child{border-bottom:none}
+  .hitos-table th{text-align:left;padding:10px 14px 10px 0;font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;width:190px;white-space:nowrap;vertical-align:baseline}
+  .hitos-table td{padding:10px 12px;font-size:13.5px;color:var(--ink);vertical-align:baseline}
+  .hitos-table td.hitos-val{font-family:'Roboto',sans-serif;font-weight:700;font-size:17px;color:var(--guinda);width:130px;white-space:nowrap;letter-spacing:-.01em}
+  .hitos-table td.hitos-ctx{color:var(--ink-2);font-size:13px;line-height:1.45}
+  .hitos-table .hitos-u{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--muted);font-weight:500;margin-left:2px}
+
+  /* Nota al pie dentro de paneles (sustituye estilos inline) */
+  .panel-note{margin-top:14px;padding:10px 14px;background:var(--bg-2);border-radius:3px;font-size:12px;color:var(--muted);line-height:1.55;border-left:3px solid var(--dorado)}
+
+  @media (max-width:1024px){
+    .hitos-table th{width:160px;font-size:10px}
+    .hitos-table td.hitos-val{width:110px;font-size:16px}
+  }
+  @media (max-width:640px){
+    .panel-compact{padding:16px 18px}
+    .hitos-table th{width:auto;display:block;padding:10px 0 2px;border:none}
+    .hitos-table td{display:block;padding:0 0 4px}
+    .hitos-table td.hitos-val{width:auto;display:inline-block;margin-right:10px;font-size:18px}
+    .hitos-table td.hitos-ctx{display:inline;font-size:12.5px}
+    .hitos-table tr{padding:8px 0;display:block}
+  }
+
+  .comp{width:100%;border-collapse:collapse}
+  .comp th,.comp td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line-soft);font-size:14px}
+  .comp th{font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--guinda);font-weight:500;background:var(--bg-2)}
+  .comp td.num{font-family:'Roboto Mono',monospace;text-align:right;color:var(--ink);font-weight:500}
+  .comp td.grp{font-weight:500;color:var(--ink)}
+  .comp .chip{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:10px;vertical-align:middle}
+  .chip.bu{background:var(--bu)} .chip.br{background:var(--br)}
+  .chip.anpl{background:var(--anpl)} .chip.anpf{background:var(--anpf)}
+  .comp .share{position:relative;width:100%;height:6px;background:var(--bg-2);border-radius:3px;overflow:hidden}
+  .comp .share-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+  /* Wrapper con scroll horizontal e indicador visual en mobile */
+  .comp-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .share-fill.bu{background:var(--bu)} .share-fill.br{background:var(--br)}
+  .share-fill.anpl{background:var(--anpl)} .share-fill.anpf{background:var(--anpf)}
+
+  .dist{display:flex;flex-direction:column;gap:6px}
+  .bar-row{display:grid;grid-template-columns:1.2fr 2.4fr auto;gap:12px;align-items:center;font-size:13.5px}
+  .bar-row .lbl{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
+  .bar-row .track{position:relative;height:20px;background:var(--bg-2);border-radius:3px;overflow:hidden}
+  .bar-row .fill{position:absolute;left:0;top:0;bottom:0;background:var(--guinda);border-radius:3px;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+  .bar-row .fill.bu{background:var(--bu)} .bar-row .fill.br{background:var(--br)}
+  .bar-row .fill.anpl{background:var(--anpl)} .bar-row .fill.anpf{background:var(--anpf)}
+  .bar-row .v{font-family:'Roboto Mono',monospace;font-size:12.5px;color:var(--ink);white-space:nowrap;min-width:80px;text-align:right;font-weight:500}
+
+  /* Tarjetas de definición (glosario técnico-jurídico) */
+  .legal-card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:20px 22px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+  .legal-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--legal)}
+  .legal-card .l-art{display:inline-block;font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--legal);background:rgba(143,72,153,.08);padding:3px 8px;border-radius:3px;margin-bottom:10px;font-weight:500}
+  .legal-card h4{font-family:'Roboto',sans-serif;font-size:20px;font-weight:700;line-height:1.2;margin-bottom:10px;color:var(--ink);letter-spacing:-.01em}
+  .legal-card p{font-size:13.5px;color:var(--ink-2);line-height:1.6}
+
+  /* Listados normativos — contenidos por artículo, dentro de paneles */
+  .legal-list{margin-top:14px}
+  .legal-list ul{list-style:none;padding:0;margin:0}
+  .legal-list li{padding:12px 0;font-size:13px;color:var(--ink-2);border-bottom:1px dotted var(--line-soft);display:block;line-height:1.55;word-wrap:break-word;overflow-wrap:break-word}
+  .legal-list li:last-child{border-bottom:none}
+  .legal-list li .lbl{color:var(--ink);font-weight:500;display:block;margin-bottom:3px;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto}
+  .legal-list li .ref{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.04em;font-weight:400;display:block;word-wrap:break-word;overflow-wrap:break-word;white-space:normal}
+
+  /* Variante compacta — ref a la izquierda (mono, pequeña) · contenido a la derecha */
+            
+  @media (max-width:640px){
+          }
+
+  /* Acento cromático a nivel panel — sin solapamiento con la envoltura interna */
+  .panel-accent-ava{border-left:3px solid var(--verde)}
+  .panel-accent-ava .panel-title{color:var(--verde)}
+  .panel-accent-anp{border-left:3px solid var(--guinda)}
+  .panel-accent-anp .panel-title{color:var(--guinda)}
+
+  /* Enlaces a textos oficiales de leyes · pie institucional del panel */
+  .ley-link{display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:9px 14px;background:var(--bg-2);border:1px solid var(--line-soft);border-radius:var(--radius);text-decoration:none;font-size:12.5px;color:var(--ink-2);transition:all .15s;font-family:'Roboto',sans-serif;line-height:1.4;max-width:100%}
+  .ley-link:hover{background:#fff;transform:translateY(-1px)}
+  .ley-link-ico{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;min-width:24px;border-radius:50%;font-size:12px;font-weight:700}
+  .ley-link-txt{flex:1;min-width:0;word-wrap:break-word;overflow-wrap:break-word}
+  .ley-link-txt b{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.04em;font-weight:500}
+  .ley-link-local{border-left:3px solid var(--guinda)}
+  .ley-link-local:hover{border-color:var(--guinda);color:var(--guinda)}
+  .ley-link-local .ley-link-ico{background:var(--guinda);color:var(--crema)}
+  .ley-link-local .ley-link-txt b{color:var(--guinda)}
+  .ley-link-federal{border-left:3px solid var(--azul)}
+  .ley-link-federal:hover{border-color:var(--azul);color:var(--azul)}
+  .ley-link-federal .ley-link-ico{background:var(--azul);color:var(--crema)}
+  .ley-link-federal .ley-link-txt b{color:var(--azul)}
+
+  /* Listado de fracciones del Art. 46 LGEEPA — compacto, todas federales */
+  .fracciones-list{list-style:none;padding:0;margin:12px 0 0 0}
+  .fr-item{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px dotted var(--line-soft)}
+  .fr-item:last-child{border-bottom:none}
+  .fr-num{font-family:'Roboto Mono',monospace;font-size:11.5px;color:var(--azul);font-weight:500;letter-spacing:.04em;white-space:nowrap}
+  .fr-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fr-lbl{font-size:13.5px;color:var(--ink);font-weight:600;line-height:1.3}
+  .fr-desc{font-size:12px;color:var(--ink-2);line-height:1.5}
+
+  @media (max-width:640px){
+    .fr-item{grid-template-columns:52px 1fr;gap:10px;padding:8px 0}
+    .fr-lbl{font-size:13px}
+    .fr-desc{font-size:11.5px}
+  }
+  .legal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  .legal-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+
+  .toolbar{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px;display:grid;grid-template-columns:1.6fr 1.1fr 1.1fr 1.1fr .8fr auto;gap:10px;align-items:end;margin-bottom:14px;box-shadow:var(--shadow)}
+  .toolbar label{display:flex;flex-direction:column;gap:4px}
+  .lab{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  input[type=search],select{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;font-family:'Roboto',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .15s;width:100%}
+  input[type=search]:focus,select:focus{border-color:var(--guinda)}
+  .btn{background:var(--guinda);color:var(--crema);border:none;border-radius:var(--radius);padding:0 16px;font-family:'Roboto',sans-serif;font-weight:500;font-size:13px;letter-spacing:.02em;cursor:pointer;transition:background .15s;height:38px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+  .btn:hover{background:#7a1a37}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--bg-2);border-color:var(--guinda);color:var(--guinda)}
+  .btn-group{display:flex;gap:8px}
+
+  .counter-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:400}
+  .counter-row b{color:var(--guinda);font-weight:500}
+
+  /* Indicadores de interactividad — ayuda contextual para nuevos usuarios */
+  .tip-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .tip-chip{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;background:var(--bg-2);border:1px dashed var(--line);border-radius:3px;font-size:11px;color:var(--muted);font-weight:400;line-height:1.3}
+  .tip-chip .tip-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--card);border:1px solid var(--line-soft);border-radius:50%;font-weight:700;color:var(--guinda);font-size:11px}
+
+  .table-wrap{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .table-scroll{max-height:70vh;overflow:auto}
+  table.t{width:100%;border-collapse:collapse}
+  thead.t-head th{background:var(--bg-2);text-align:left;padding:10px 12px;font-size:10.5px;font-family:'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-weight:500;border-bottom:2px solid var(--guinda);cursor:pointer;user-select:none;position:sticky;top:0;white-space:nowrap;z-index:2;transition:background .15s,color .15s}
+  thead.t-head th:hover{color:var(--guinda);background:#fff}
+  thead.t-head th .arrow{opacity:.45;margin-left:4px;font-size:10px;transition:opacity .15s,color .15s;display:inline-block}
+  thead.t-head th:hover .arrow{opacity:.8}
+  thead.t-head th.sort-asc .arrow,thead.t-head th.sort-desc .arrow{opacity:1;color:var(--guinda)}
+  tbody.t-body tr{border-bottom:1px solid var(--line-soft);cursor:pointer;transition:background .15s,box-shadow .15s}
+  tbody.t-body tr:hover{background:var(--bg-2);box-shadow:inset 3px 0 0 var(--guinda)}
+  tbody.t-body td{padding:10px 12px;font-size:13.5px;color:var(--ink-2);vertical-align:top;font-weight:400;position:relative}
+  tbody.t-body td.name{color:var(--ink);font-weight:500;max-width:220px;padding-left:18px}
+  tbody.t-body td.name::before{content:"›";position:absolute;left:4px;top:10px;color:var(--line);font-weight:700;font-size:16px;transition:color .15s,transform .15s}
+  tbody.t-body tr:hover td.name::before{color:var(--guinda);transform:translateX(2px)}
+  tbody.t-body td.num{font-family:'Roboto Mono',monospace;font-size:12.5px;text-align:right;white-space:nowrap;font-weight:500}
+  tbody.t-body td.date{font-family:'Roboto Mono',monospace;font-size:12px;white-space:nowrap;color:var(--ink-2)}
+
+  /* ===== Sistema de tags con paleta oficial GCDMX · cero repeticiones ===== */
+  /* TIPO (outline discreto) — deja que la subcategoría destaque como dato principal */
+  .tag{display:inline-block;padding:2px 8px;border-radius:2px;font-size:10.5px;font-family:'Roboto Mono',monospace;letter-spacing:.04em;white-space:nowrap;font-weight:500}
+    
+  /* JURISDICCIÓN (también outline para mantener jerarquía) */
+  .tag-jur-Local{background:transparent;color:var(--ink-2);border:1px solid var(--line)}
+  .tag-jur-Federal{background:transparent;color:var(--azul);border:1px solid var(--azul)}
+
+  /* TIPO (AVA · ANP) — fondo sólido institucional */
+  .tag-AVA  {background:transparent; color:var(--dorado);  border:1px solid var(--dorado)}
+  .tag-ANP  {background:transparent; color:var(--guinda);  border:1px solid var(--guinda)}
+
+  /* SUBCATEGORÍA — todas con color único basado en paleta GCDMX */
+  .tag-sub{display:inline-block;padding:3px 9px;border-radius:2px;font-size:10.5px;font-family:'Roboto Mono',monospace;letter-spacing:.03em;white-space:nowrap;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  /* AVA */
+  .sub-BU   {background:var(--naranja);    color:var(--ink)}        /* Naranja 151C */
+  .sub-BR   {background:var(--marron);     color:var(--crema)}      /* Marrón 146C  */
+  /* ANP Local */
+  .sub-ZCE  {background:var(--gris);       color:var(--crema)}      /* Gris 425C    */
+  .sub-ZSCE {background:var(--azul-claro); color:var(--ink)}        /* Azul cl 0821C */
+  .sub-ZPE  {background:var(--amarillo);   color:var(--ink)}        /* Amarillo 7548C */
+  .sub-ZEC  {background:var(--rosa-claro); color:var(--ink)}        /* Rosa 176C    */
+  .sub-ZPHE {background:var(--magenta);    color:var(--crema)}      /* Magenta 225C */
+  .sub-REC  {background:var(--dorado);     color:var(--crema)}      /* Dorado 465C  */
+  /* ANP Federal */
+  .sub-PN   {background:var(--rojo);       color:var(--crema)}      /* Rojo 1925C   */
+  .sub-APRN {background:var(--violeta);    color:var(--crema)}      /* Violeta 258C */
+  /* Fallbacks · subcategorías no presentes en inventario actual */
+  .sub-RVS  {background:#5d8a5e;           color:var(--crema)}      /* Verde oliva  */
+  .sub-RB   {background:#8b4513;           color:var(--crema)}      /* Sienna       */
+  .sub-MN   {background:#4a90a4;           color:var(--crema)}      /* Azul gris    */
+  .sub-APFF {background:#7e57c2;           color:var(--crema)}      /* Púrpura      */
+  .sub-SAN  {background:#d35400;           color:var(--crema)}      /* Naranja oscuro */
+
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  .dot.si{background:var(--verde)} .dot.no{background:var(--rojo)}
+  .pm-si{color:var(--verde);font-weight:500} .pm-no{color:var(--rojo);font-weight:500}
+  .empty{padding:60px 20px;text-align:center;color:var(--muted);font-style:italic}
+
+  /* Leyenda institucional de nomenclatura */
+  /* (Bloque de nomenclatura institucional eliminado) */
+
+  /* Bloque constitucional — norma suprema local */
+  .constitucion-block{border-left:4px solid var(--guinda)}
+  .constitucion-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+  .constitucion-card{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:16px 18px}
+  .constitucion-card .l-art{display:inline-block;font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--guinda);background:rgba(157,33,72,.08);padding:3px 8px;border-radius:3px;margin-bottom:10px;font-weight:500}
+  .constitucion-card h4{font-family:'Roboto',sans-serif;font-size:16px;font-weight:700;line-height:1.25;margin-bottom:8px;color:var(--ink);letter-spacing:-.005em}
+  .constitucion-card p{font-size:13px;color:var(--ink-2);line-height:1.6}
+  @media (max-width:900px){ .constitucion-grid{grid-template-columns:1fr} }
+
+  /* Meta comparable · línea base sexenal */
+  .meta-block{border-left:4px solid var(--guinda)}
+  .meta-block .panel-intro{max-width:100%}
+  .meta-hero{display:grid;grid-template-columns:1fr 40px 1fr;gap:18px;align-items:stretch;margin:22px 0}
+  .meta-col{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--radius);padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+  .meta-col-base{border-top:3px solid var(--gris)}
+  .meta-col-goal{border-top:3px solid var(--guinda);background:linear-gradient(to bottom, rgba(157,33,72,.03), var(--card))}
+  .meta-col-head{display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--line-soft);padding-bottom:12px}
+  .meta-period{font-family:'Roboto',sans-serif;font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-.02em}
+  .meta-col-goal .meta-period{color:var(--guinda)}
+  .meta-label{font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .meta-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .meta-stat{display:flex;flex-direction:column;gap:4px}
+  .meta-n{font-family:'Roboto',sans-serif;font-size:56px;font-weight:900;line-height:.95;color:var(--gris);letter-spacing:-.03em}
+  .meta-n.meta-actual{color:var(--guinda)}
+  .meta-t{font-size:12.5px;color:var(--ink-2);line-height:1.35}
+  .meta-rate{font-size:12.5px;color:var(--muted);font-family:'Roboto Mono',monospace;letter-spacing:.02em;margin-top:auto;padding-top:10px;border-top:1px dotted var(--line-soft)}
+  .meta-rate b{color:var(--ink);font-weight:700}
+  .meta-arrow{display:flex;align-items:center;justify-content:center;font-family:'Roboto',sans-serif;font-size:38px;color:var(--guinda);font-weight:300}
+
+  .meta-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .meta-card{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:16px 18px}
+  .meta-card.meta-current{background:#fff;border-left:3px solid var(--guinda)}
+  .meta-card-title{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--guinda);font-weight:500;margin-bottom:12px}
+  .meta-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .meta-tag{padding:3px 9px !important;font-size:11.5px !important}
+  .meta-details{margin-top:10px}
+  .meta-details summary{cursor:pointer;font-size:12.5px;color:var(--guinda);padding:8px 14px;background:var(--bg-2);border:1px solid var(--line-soft);border-radius:3px;font-weight:500;user-select:none;list-style:none;display:inline-flex;align-items:center;gap:8px;transition:all .15s}
+  .meta-details summary::-webkit-details-marker{display:none}
+  .meta-details summary::before{content:"▸";font-size:11px;display:inline-block;transition:transform .2s ease;color:var(--guinda)}
+  .meta-details[open] summary::before{transform:rotate(90deg)}
+  .meta-details summary:hover{background:#fff;border-color:var(--guinda);box-shadow:0 1px 3px rgba(157,33,72,.08)}
+  .meta-details[open] summary{background:#fff;border-color:var(--guinda)}
+  .meta-list{list-style:none;padding:0;margin:8px 0 0 0}
+  .meta-list li{padding:8px 0;font-size:12.5px;color:var(--ink-2);border-bottom:1px dotted var(--line-soft);display:block;line-height:1.5}
+  .meta-list li:last-child{border-bottom:none}
+  .meta-list li .lbl{color:var(--ink);font-weight:500;display:block}
+  .meta-list li .ref{font-family:'Roboto Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:.03em;display:block;margin-top:2px}
+  .meta-ref{margin-top:16px;padding:10px 14px;background:var(--bg-2);border-radius:3px;font-size:11.5px;color:var(--muted);font-family:'Roboto Mono',monospace;letter-spacing:.03em;text-align:center}
+
+  @media (max-width:900px){
+    .meta-hero{grid-template-columns:1fr;gap:12px}
+    .meta-arrow{transform:rotate(90deg);font-size:28px}
+    .meta-n{font-size:48px}
+    .meta-breakdown{grid-template-columns:1fr}
+  }
+  @media (max-width:640px){
+    .meta-stats{grid-template-columns:1fr}
+    .meta-n{font-size:44px}
+    .meta-col{padding:18px 18px}
+  }
+
+  .backdrop{position:fixed;inset:0;background:rgba(42,42,42,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:1000}
+  .backdrop.show,.backdrop.open{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,94vw);background:var(--card);border-left:3px solid var(--guinda);transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:1001;overflow-y:auto}
+  .drawer.open{transform:translateX(0)}
+  .drawer-inner{padding:30px 34px 50px}
+  .drawer .close{position:absolute;top:16px;right:18px;background:transparent;border:none;font-size:28px;cursor:pointer;color:var(--ink-2);width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;line-height:1}
+  .drawer .close:hover{background:var(--bg-2);color:var(--guinda)}
+  .drawer .kat{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda);margin-bottom:10px;font-weight:500}
+  .drawer h2{font-family:'Roboto',sans-serif;font-weight:700;font-size:28px;line-height:1.2;margin-bottom:6px;color:var(--ink);letter-spacing:-.01em}
+  .drawer .subcat{font-size:13.5px;color:var(--muted);margin-bottom:18px;font-style:italic}
+
+  /* Mapa Leaflet dentro del drawer */
+  .map-block{margin-top:8px;margin-bottom:22px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line-soft);position:relative;background:var(--bg-2)}
+  .map-block-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-2);border-bottom:1px solid var(--line-soft)}
+  .map-block-title{font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--guinda);font-weight:500}
+  .map-block-toggle{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .map-block-toggle button{background:#fff;border:none;padding:3px 9px;font-family:'Roboto Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;font-weight:500;transition:all .15s}
+  .map-block-toggle button:hover{background:var(--bg-2);color:var(--guinda)}
+  .map-block-toggle button.active{background:var(--guinda);color:var(--crema)}
+  .map-block-toggle button + button{border-left:1px solid var(--line)}
+  .map-canvas{height:340px;width:100%;background:#e8e3d4}
+  .map-canvas.no-data{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12.5px;text-align:center;padding:20px;background:var(--bg-2);font-family:'Roboto',sans-serif}
+  .map-canvas.no-data b{display:block;color:var(--ink-2);margin-bottom:6px;font-size:13px}
+  .map-block-foot{display:flex;align-items:center;gap:14px;padding:7px 12px;background:#fff;border-top:1px solid var(--line-soft);font-size:11px;color:var(--muted);font-family:'Roboto Mono',monospace;letter-spacing:.04em}
+  .map-block-foot a{color:var(--guinda);text-decoration:none;font-weight:500}
+  .map-block-foot a:hover{text-decoration:underline}
+  /* Leaflet override · suaviza tooltips para identidad institucional */
+        @media (max-width:640px){
+    .map-canvas{height:280px}
+    /* En táctil agrandamos los toggles para superar 32px de alto (recomendación WCAG) */
+    .map-block-toggle button{padding:11px 14px;font-size:10px}
+    .map-block-toggle{flex-shrink:0}
+  }
+
+  /* Touch-friendly: en cualquier dispositivo táctil agrandamos botones críticos */
+  @media (pointer:coarse), (max-width:640px){
+    .map-filter-chip{padding:8px 14px;font-size:12.5px;min-height:36px}
+    .map-filter-chip .chip-dot{width:11px;height:11px}
+    .drawer .close{width:44px;height:44px;font-size:30px}
+    .chat-input button{width:44px;height:44px}
+    .chat-suggestions .chat-sugg{padding:8px 14px;font-size:12.5px}
+  }
+
+  /* === Asistente · chat institucional === */
+  .chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--guinda);color:var(--crema);border:none;cursor:pointer;box-shadow:0 4px 16px rgba(157,33,72,.35);display:flex;align-items:center;justify-content:center;font-family:'Roboto',sans-serif;z-index:998;transition:transform .2s,box-shadow .2s}
+  .chat-fab:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 6px 22px rgba(157,33,72,.5)}
+  .chat-fab svg{width:24px;height:24px;fill:currentColor}
+  .chat-fab .chat-fab-pulse{position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--guinda);opacity:.55;animation:chat-pulse 2.4s ease-out infinite}
+  @keyframes chat-pulse{0%{transform:scale(.85);opacity:.7}80%,100%{transform:scale(1.4);opacity:0}}
+
+  /* Accesibilidad: respeta la preferencia del usuario por menos movimiento */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.01ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.01ms!important;
+      scroll-behavior:auto!important;
+    }
+    .chat-fab .chat-fab-pulse{display:none}
+  }
+
+  .chat-panel{position:fixed;bottom:24px;right:24px;width:min(420px,calc(100vw - 32px));height:min(620px,calc(100vh - 48px));background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);box-shadow:0 14px 48px rgba(42,42,42,.18);display:none;flex-direction:column;z-index:10000;overflow:hidden;font-family:'Roboto',sans-serif}
+  /* Cuando el chat está abierto, ocultar controles del mapa Leaflet para que no se solapen */
+  body:has(.chat-panel.open) .leaflet-control-container{display:none !important}
+  .chat-panel.open{display:flex}
+  .chat-head{background:var(--guinda);color:var(--crema);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+  .chat-head .chat-title{font-weight:600;font-size:14px;letter-spacing:.02em}
+  .chat-head .chat-eyebrow{font-family:'Roboto Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.85;margin-bottom:2px}
+  .chat-head .chat-close{background:transparent;border:none;color:var(--crema);width:30px;height:30px;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;transition:background .15s}
+  .chat-head .chat-close:hover{background:rgba(255,255,255,.2)}
+  .chat-body{flex:1;overflow-y:auto;padding:20px;background:var(--bg);display:flex;flex-direction:column;gap:14px}
+  .chat-body::-webkit-scrollbar{width:8px}
+  .chat-body::-webkit-scrollbar-track{background:transparent}
+  .chat-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+  .chat-msg{max-width:88%;padding:11px 14px;border-radius:8px;font-size:13.5px;line-height:1.55;word-wrap:break-word}
+  .chat-msg.user{align-self:flex-end;background:var(--guinda);color:var(--crema);border-bottom-right-radius:2px}
+  .chat-msg.assistant{align-self:flex-start;background:var(--card);color:var(--ink);border:1px solid var(--line-soft);border-bottom-left-radius:2px}
+  .chat-msg.assistant b{color:var(--guinda);font-weight:600}
+  .chat-msg.assistant .data-list{margin:8px 0 0;padding:0;list-style:none}
+  .chat-msg.assistant .data-list li{padding:6px 0;border-top:1px solid var(--line-soft);font-size:12.5px;display:flex;justify-content:space-between;gap:10px}
+  .chat-msg.assistant .data-list li:first-child{border-top:none;padding-top:4px}
+  .chat-msg.assistant .data-list li .v{font-family:'Roboto Mono',monospace;color:var(--guinda);font-weight:500;white-space:nowrap}
+  .chat-msg.assistant 
+  .chat-suggestions{padding:14px 20px 14px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--line-soft);background:var(--bg)}
+  .chat-suggestions.hidden{display:none}
+  .chat-suggestions .chat-sugg-label{width:100%;font-family:'Roboto Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .chat-suggestions .chat-sugg{padding:6px 12px;font-size:11.5px;background:var(--card);border:1px solid var(--line);border-radius:14px;cursor:pointer;color:var(--ink-2);font-family:'Roboto',sans-serif;transition:all .15s;text-align:left;line-height:1.35}
+  .chat-suggestions .chat-sugg:hover{border-color:var(--guinda);color:var(--guinda);background:#fff}
+
+  .chat-input{padding:14px 16px;border-top:1px solid var(--line);background:var(--card);display:flex;gap:8px;align-items:center}
+  .chat-input input{flex:1;padding:9px 12px;border:1.5px solid var(--line);border-radius:6px;font-family:'Roboto',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border-color .15s;background:var(--card)}
+  .chat-input input:focus{border-color:var(--guinda)}
+  .chat-input button{background:var(--guinda);color:var(--crema);border:none;width:36px;height:36px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+  .chat-input button:hover{background:#7a193a}
+  .chat-input button:disabled{background:var(--line);cursor:default}
+  .chat-input button svg{width:16px;height:16px;fill:currentColor}
+
+  @media (max-width:640px){
+    .chat-fab{bottom:16px;right:16px;width:50px;height:50px}
+    .chat-panel{bottom:0;right:0;left:0;width:100vw;height:80vh;border-radius:var(--radius) var(--radius) 0 0}
+  }
+  .map-filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;margin-bottom:10px}
+  .map-filter-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;background:#fff;border:1.5px solid var(--line);border-radius:3px;font-size:12px;color:var(--ink-2);cursor:pointer;font-weight:500;font-family:'Roboto',sans-serif;transition:all .15s}
+  .map-filter-chip:hover{border-color:var(--ink-2)}
+  .map-filter-chip .chip-dot{width:10px;height:10px;border-radius:50%;background:var(--chip-color);display:inline-block;flex-shrink:0;border:1.5px solid var(--chip-color)}
+  .map-filter-chip:not(.active){opacity:.55}
+  .map-filter-chip:not(.active) .chip-dot{background:transparent}
+  .map-filter-chip.active{border-color:var(--chip-color);color:var(--ink);background:#fff}
+  .map-filter-chip .chip-count{font-family:'Roboto Mono',monospace;font-size:10.5px;color:var(--muted);font-weight:500;letter-spacing:.04em;margin-left:2px}
+  .map-filter-chip.active .chip-count{color:var(--chip-color)}
+
+  .global-map-block{margin-top:6px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line-soft);background:var(--bg-2)}
+  #globalMapCanvas{height:600px;width:100%;background:#e8e3d4}
+
+  /* Tooltip discreto para alcaldías (overlay de contexto) */
+  
+  @media (max-width:1024px){
+    #globalMapCanvas{height:500px}
+  }
+  @media (max-width:640px){
+    #globalMapCanvas{height:420px}
+    .map-filter-chip{padding:5px 10px;font-size:11.5px}
+  }
+  .field{padding:12px 0;border-bottom:1px solid var(--line-soft);display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:baseline}
+  .field .k{font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .field .v{color:var(--ink);font-size:14px;font-weight:400}
+  .big-num{font-family:'Roboto',sans-serif;font-size:38px;line-height:1;color:var(--guinda);margin:20px 0 4px;font-weight:900;letter-spacing:-.02em}
+  .big-num-lbl{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;font-weight:500}
+  .legal-block{margin-top:24px;padding:18px 20px;background:var(--bg-2);border-left:3px solid var(--legal);border-radius:0 3px 3px 0}
+  .legal-block .title{font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--legal);margin-bottom:10px;font-weight:500}
+  .legal-block p{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:8px}
+  .legal-block p:last-child{margin-bottom:0}
+  .legal-block .ref{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--muted);font-weight:500}
+
+  /* Global: prevent any word overflow in text content */
+  .panel h3, .panel-intro, .hero-sub, 
+  /* ===== BREAKPOINT 1 — iPad 11" landscape y pantallas medianas (≤1200px) ===== */
+  @media (max-width:1200px){
+    .wrap{padding:28px 22px 70px}
+    h1{font-size:42px}
+    .hero{grid-template-columns:repeat(2,1fr)}
+    .legal-grid-3{grid-template-columns:1fr 1fr}
+  }
+
+  /* ===== BREAKPOINT 2 — iPad 11" portrait y tablets (≤1024px) ===== */
+  @media (max-width:1024px){
+    .wrap{padding:26px 20px 60px}
+    h1{font-size:38px}
+    .grid-2,.legal-grid{grid-template-columns:1fr}
+    .grid-3,.legal-grid-3{grid-template-columns:repeat(2,1fr)}
+    .toolbar{grid-template-columns:repeat(3,1fr)}
+    .btn-group{grid-column:span 3;justify-content:flex-end}
+    .constitucion-grid{grid-template-columns:1fr}
+    .panel{padding:22px 22px}
+    .hero-value{font-size:40px}
+    /* Table: enable horizontal scroll only if truly needed */
+    .table-scroll{overflow-x:auto}
+    table.t{min-width:820px}
+  }
+
+  /* ===== BREAKPOINT 3 — iPad 11" portrait estricto y tablets pequeñas (≤900px) ===== */
+  @media (max-width:900px){
+    header.top{flex-direction:column;align-items:flex-start;gap:14px}
+    .meta{text-align:left}
+    .hero{grid-template-columns:repeat(2,1fr);gap:10px}
+    .hero-card{padding:16px 18px}
+    .hero-value{font-size:34px}
+    .grid-3{grid-template-columns:repeat(2,1fr)}
+    .tab{min-width:auto;font-size:12px;padding:10px 10px;gap:9px}
+    .tab-name{font-size:12px}
+    .tab-num{font-size:9.5px}
+    .tab-icon{width:20px;height:20px}
+        .constitucion-card h4{font-size:15px}
+    .panel h3{font-size:22px}
+  }
+
+  /* ===== BREAKPOINT 4 — Móvil grande (≤640px) ===== */
+  @media (max-width:640px){
+    .wrap{padding:20px 14px 50px}
+    h1{font-size:30px}
+    .sub{font-size:14px}
+    .hero{grid-template-columns:1fr}
+    .grid-3,.legal-grid-3{grid-template-columns:1fr}
+    .toolbar{grid-template-columns:1fr 1fr;padding:12px}
+    .btn-group{grid-column:span 2}
+    .field{grid-template-columns:100px 1fr;gap:10px}
+    .field .k{font-size:9.5px}
+    .field .v{font-size:13px}
+    .bar-row{grid-template-columns:1fr;gap:6px}
+    .bar-row .lbl{white-space:normal;overflow:visible;text-overflow:unset;font-weight:500}
+    .bar-row .v{text-align:left;min-width:auto}
+    .comp{font-size:12px}
+    .comp th,.comp td{padding:8px 6px}
+    .comp-scroll{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 24px),transparent 100%);mask-image:linear-gradient(to right,#000 calc(100% - 24px),transparent 100%)}
+    .comp-scroll .comp{min-width:560px}
+    .panel{padding:18px 16px}
+    .panel h3{font-size:20px}
+    .panel-intro{font-size:13px}
+    .constitucion-card{padding:14px 16px}
+    .constitucion-card h4{font-size:14px}
+    .constitucion-card p{font-size:12.5px}
+    .legal-card{padding:16px 18px}
+    .legal-card h4{font-size:17px}
+    .legal-card li{padding:9px 0;font-size:12.5px}
+    .legal-card li .ref{font-size:10.5px}
+        .hero-value{font-size:32px}
+    .big-num{font-size:32px}
+    .counter-row{flex-direction:column;align-items:flex-start;gap:6px;font-size:10.5px}
+    .drawer{width:100vw}
+    .drawer-inner{padding:24px 22px 40px}
+    .drawer h2{font-size:24px}
+    .tabs{padding:3px;scroll-snap-type:x mandatory;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent 100%)}
+    .tab{padding:8px 9px;min-width:120px;gap:8px;scroll-snap-align:start;flex-shrink:0}
+    .tab-icon{width:18px;height:18px}
+  }
+
+  /* ===== BREAKPOINT 5 — Móvil pequeño (≤420px) ===== */
+  @media (max-width:420px){
+    .wrap{padding:16px 12px 40px}
+    h1{font-size:26px}
+    .hero-card{padding:14px 14px}
+    .hero-value{font-size:28px}
+        .panel h3{font-size:18px}
+    .toolbar{grid-template-columns:1fr}
+    .btn-group{grid-column:span 1}
+    .tab-name{font-size:11.5px}
+    .tab-num{font-size:9px}
+    .tab{min-width:108px;gap:7px}
+    .tab-icon{width:17px;height:17px}
+  }
+
+  @media print{
+    body{background:#fff}
+    .tabs,.toolbar,.btn,.drawer,.backdrop,.counter-row,.tip-row{display:none !important}
+    .table-wrap{box-shadow:none;border:1px solid #999;max-height:none}
+    .table-scroll{max-height:none;overflow:visible}
+    .panel{break-inside:avoid;page-break-inside:avoid}
+    .legal-card li,.legal-list li{break-inside:avoid}
+    .logo-bar{border-bottom:1px solid #999;margin-bottom:16px;padding-bottom:12px}
+    .logo-inst{height:50px}
+  }
+
+  /* === Suelo de Conservación: capa overlay === */
+  .sc-toggle-row{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .sc-toggle-btn{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:3px;background:#fff;cursor:pointer;font-family:'Roboto Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:500;transition:all .15s}
+  .sc-toggle-btn:hover{background:#e0f7fa;color:#006064;border-color:#4dd0e1}
+  .sc-toggle-btn.active{background:#00838f;border-color:#006064;color:#fff}
+  .sc-toggle-btn .sc-swatch{width:10px;height:10px;border:1.5px solid #006064;background:rgba(0,131,143,.25);display:inline-block;border-radius:2px}
+  .sc-toggle-btn.active .sc-swatch{background:rgba(255,255,255,.4);border-color:#fff}
+  .sc-tag,.status-tag{display:inline-block;padding:2px 9px;border-radius:3px;font-size:11px;font-weight:600;font-family:'Roboto Mono',monospace;letter-spacing:.04em;text-transform:none}
+  .sc-tag-si,.status-tag-si{background:#3a7d44;color:#fff}
+  .sc-tag-no,.status-tag-no{background:var(--rojo);color:#fff}
+  @media (max-width: 480px){
+    .sc-toggle-btn{padding:9px 12px;font-size:10px}
+  }
+
+  
+  /* Footer institucional · siempre visible al final del wrap */
+  .sia-footer{margin-top:48px;padding:24px 0;border-top:1px solid var(--line);background:transparent}
+  .sia-footer-inner{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .sia-footer-text{color:var(--guinda);font-weight:600}
+  .sia-footer-text-2{color:var(--ink-2);font-weight:400}
+  .sia-footer-sep{color:var(--line);font-weight:300}
+  @media (max-width:600px){
+    .sia-footer-inner{flex-direction:column;gap:4px;font-size:10px;text-align:center}
+    .sia-footer-sep{display:none}
+  }
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo-bar">
+    <img src="./SIA_LOGO-03.png" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente · Sistema de Información Ambiental" class="logo-inst">
+  </div>
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Sistema de Información Ambiental · SIA</span>
+      <h1>Dashboard de Categorías de <em>Protección Ambiental</em></h1>
+    </div>
+    <div class="meta">
+      <div>REGISTROS · <b id="metaCount">—</b></div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+  <section id="dashboard"></section>
+
+  <div id="tableSection">
+    <div class="toolbar">
+      <label><span class="lab">Búsqueda</span><input id="q" type="search" placeholder="Nombre, alcaldía, subcategoría…" /></label>
+      <label><span class="lab">Jurisdicción</span><select id="fJur"><option value="">Todas</option><option value="Local">Local</option><option value="Federal">Federal</option></select></label>
+      <label><span class="lab">Subcategoría</span><select id="fCat"><option value="">Todas</option></select></label>
+      <label><span class="lab">Alcaldía</span><select id="fAlc"><option value="">Todas</option></select></label>
+      <label><span class="lab">Programa de manejo</span><select id="fPM"><option value="">Todos</option><option value="Sí">Con PM</option><option value="No">Sin PM</option></select></label>
+      <div class="btn-group"><button class="btn ghost" id="btnReset">Limpiar</button><button class="btn" id="btnExport">↓ CSV</button></div>
+    </div>
+    <div class="counter-row">
+      <span>Mostrando <b id="showCount">0</b> de <b id="totalCount">0</b> registros · Suma filtrada: <b id="sumFiltered">0</b> ha</span>
+      <span id="sortInfo">Orden · Nombre ↑</span>
+    </div>
+    <div class="tip-row">
+      <span class="tip-chip"><span class="tip-ico">↔</span> Clic en encabezados para ordenar</span>
+      <span class="tip-chip"><span class="tip-ico">›</span> Clic en una fila para ver el detalle</span>
+    </div>
+    <div class="table-wrap"><div class="table-scroll">
+      <table class="t">
+        <thead class="t-head"><tr>
+          <th data-k="nombre">Nombre <span class="arrow">▲</span></th>
+          <th data-k="tipo">Tipo <span class="arrow">▲</span></th>
+          <th data-k="jurisdiccion">Jurisdicción <span class="arrow">▲</span></th>
+          <th data-k="categoria">Subcategoría <span class="arrow">▲</span></th>
+          <th data-k="alcaldia">Alcaldía <span class="arrow">▲</span></th>
+          <th data-k="fecha_decreto_iso" style="text-align:right">Decreto <span class="arrow">▲</span></th>
+          <th data-k="superficie" style="text-align:right">Sup. (ha) <span class="arrow">▲</span></th>
+          <th data-k="programa_manejo" title="Programa de Manejo">PM <span class="arrow">▲</span></th>
+          <th data-k="suelo_conservacion" title="Suelo de Conservación">En SC <span class="arrow">▲</span></th>
+          <th data-k="fecha_pm_iso" style="text-align:right" title="Fecha del Programa de Manejo">Fecha PM <span class="arrow">▲</span></th>
+        </tr></thead>
+        <tbody class="t-body" id="tb"></tbody>
+      </table>
+    </div></div>
+
+    <!-- Mapa global · solo visible en pestaña Global, después de la tabla -->
+    <section id="globalMapSection" style="display:none"></section>
+  </div>
+
+  <!-- Footer institucional · siempre visible -->
+  <footer class="sia-footer" role="contentinfo">
+    <div class="sia-footer-inner">
+      <span class="sia-footer-text">Sistema de Información Ambiental · Secretaría del Medio Ambiente</span>
+      <span class="sia-footer-sep">·</span>
+      <span class="sia-footer-text-2">Gobierno de la Ciudad de México</span>
+    </div>
+  </footer>
+</div>
+
+<div class="backdrop" id="bd"></div>
+<aside class="drawer" id="dr">
+  <button class="close" id="drClose" aria-label="Cerrar">×</button>
+  <div class="drawer-inner" id="drIn"></div>
+</aside>
+
+<!-- Asistente · Chat institucional sobre el sistema de áreas protegidas -->
+<button class="chat-fab" id="chatFab" aria-label="Abrir asistente" title="Asistente sobre áreas protegidas">
+  <span class="chat-fab-pulse"></span>
+  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.04 2 11c0 2.4 1.06 4.6 2.81 6.24L4 22l4.95-1.62C10.06 20.79 11.01 21 12 21c5.52 0 10-4.04 10-9s-4.48-10-10-10zm0 16c-.96 0-1.88-.18-2.74-.51l-.34-.13-2.92.96.96-2.83-.16-.32C5.97 13.99 5.5 12.54 5.5 11c0-3.59 2.91-6.5 6.5-6.5s6.5 2.91 6.5 6.5-2.91 7-6.5 7z"/></svg>
+</button>
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="Asistente">
+  <div class="chat-head">
+    <div>
+      <div class="chat-eyebrow">Asistente · SIA</div>
+      <div class="chat-title">Consultas sobre áreas protegidas</div>
+    </div>
+    <button class="chat-close" id="chatClose" aria-label="Cerrar asistente">×</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-suggestions" id="chatSuggestions">
+    <span class="chat-sugg-label">Prueba preguntando</span>
+    <button class="chat-sugg" data-q="¿Cuál es la ANP más grande?">¿Cuál es la ANP más grande?</button>
+    <button class="chat-sugg" data-q="¿Cuál es la más antigua?">¿Cuál es la más antigua?</button>
+    <button class="chat-sugg" data-q="¿Cuántas barrancas hay?">¿Cuántas barrancas hay?</button>
+    <button class="chat-sugg" data-q="Háblame de Chapultepec">Háblame de Chapultepec</button>
+    <button class="chat-sugg" data-q="¿Qué es un AVA?">¿Qué es un AVA?</button>
+    <button class="chat-sugg" data-q="¿Qué dice la LACM?">¿Qué dice la LACM?</button>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="chatInput" placeholder="Pregunta sobre las áreas protegidas..." autocomplete="off">
+    <button id="chatSend" aria-label="Enviar">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(async function(){
+try{
+/* ===== DATA ===== */
+/* ============================================================
+   CARGA DE INVENTARIO DESDE CSV EXTERNO (data/anp_inventario.csv)
+   ============================================================ */
+function parseCSV(text){
+  // Parser CSV: maneja comillas dobles, comas escapadas y BOM
+  if(text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i = 0; i < text.length; i++){
+    const c = text[i], n = text[i+1];
+    if(inQuotes){
+      if(c === '"' && n === '"'){ field += '"'; i++; }
+      else if(c === '"'){ inQuotes = false; }
+      else field += c;
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\n' || c === '\r'){
+        if(field !== '' || row.length){ row.push(field); rows.push(row); }
+        row = []; field = '';
+        if(c === '\r' && n === '\n') i++;
+      } else field += c;
+    }
+  }
+  if(field !== '' || row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).filter(r => r.some(v => v !== '')).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (r[i] || '').trim());
+    if(obj.superficie) obj.superficie = parseFloat(obj.superficie) || 0;
+    return obj;
+  });
+}
+
+async function loadInventarioCSV(){
+  const r = await fetch('data/anp_inventario.csv');
+  if(!r.ok) throw new Error('No se encontró data/anp_inventario.csv (HTTP ' + r.status + ')');
+  const text = await r.text();
+  const rows = parseCSV(text);
+  if(!rows.length) throw new Error('El CSV está vacío o mal formado');
+  return rows;
+}
+
+const DATA_RAW = await loadInventarioCSV();
+
+// Cargar polígonos de Suelo de Conservación (capa overlay)
+let SUELO_CONSERVACION = null;
+async function loadSueloConservacion(){
+  if(SUELO_CONSERVACION) return SUELO_CONSERVACION;
+  try {
+    const r = await fetch('data/suelo_conservacion.geojson');
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    SUELO_CONSERVACION = await r.json();
+    return SUELO_CONSERVACION;
+  } catch(err){
+    console.warn('[SC] No se pudo cargar Suelo de Conservación:', err.message);
+    SUELO_CONSERVACION = {type:'FeatureCollection', features:[]};
+    return SUELO_CONSERVACION;
+  }
+}
+// Iniciar carga en paralelo (no bloquea el render)
+loadSueloConservacion();
+
+const DATA = DATA_RAW.map(d => ({
+  ...d,
+  tipo: d.grupo.startsWith('AVA') ? 'AVA' : 'ANP',
+  jurisdiccion: d.grupo.includes('Federal') ? 'Federal' : 'Local'
+}));
+
+const GROUPS = [
+  {id:'ALL',     label:'Global',          cls:'',       key:null},
+  {id:'BU',      label:'Bosques Urbanos', cls:'bu',     key:'AVA · Bosque Urbano'},
+  {id:'BR',      label:'Barrancas',       cls:'br',     key:'AVA · Barranca'},
+  {id:'ANPL',    label:'ANP Locales',     cls:'anpl',   key:'ANP · Local'},
+  {id:'ANPF',    label:'ANP Federales',   cls:'anpf',   key:'ANP · Federal'},
+  {id:'ANALISIS',label:'Análisis',        cls:'analisis',key:'ANALISIS'},
+  {id:'METAS',   label:'Metas',           cls:'metas',  key:'METAS'},
+  {id:'LEGAL',   label:'Marco Jurídico',  cls:'legal',  key:'LEGAL'},
+];
+
+/* ===== Marco jurídico ===== */
+const LEGAL = {
+  constitucion: {
+    nombre: "Constitución Política de la Ciudad de México",
+    abreviatura: "CPCDMX",
+    publicacion: "Gaceta Oficial de la Ciudad de México · 5 de febrero de 2017",
+    ultimaReforma: "Última reforma publicada en la GOCDMX el 24 de diciembre de 2025",
+    articulo: "Artículo 16 · Ordenamiento Territorial · Apartado A. Medio Ambiente",
+    parrafos: [
+      {t:"Políticas especiales de gestión ambiental", ref:"Art. 16 A.1 párr. 1",
+       c:"Derivado del escenario geográfico, hidrológico y biofísico en que se localiza la Ciudad de México, se requerirán políticas especiales que sean eficaces en materia de gestión hidrológica, protección ambiental, adaptación a fenómenos climáticos, prevención y protección civil."},
+      {t:"Sistema de Áreas Naturales Protegidas de la CDMX", ref:"Art. 16 A.1 párr. 2",
+       c:"La Ciudad de México integrará un sistema de áreas naturales protegidas. Su administración, vigilancia y manejo es responsabilidad directa de la persona titular de la Jefatura de Gobierno a través de un organismo público específico con participación ciudadana, sujeto a los principios, orientaciones, regulaciones y vigilancia que establezcan las leyes correspondientes, en coordinación con las Alcaldías, la Federación, Estados y Municipios conurbados."},
+      {t:"Coexistencia con ANP federales", ref:"Art. 16 A.1 párr. 3",
+       c:"Dicho sistema coexistirá con las áreas naturales protegidas reconocidas por la Federación."},
+      {t:"Áreas protegidas por mandato constitucional", ref:"Art. 16 A.1 párr. 4",
+       c:"El sistema protegerá, al menos: Desierto de los Leones; Parque Nacional Cumbres del Ajusco; Parque Ecológico de la Ciudad de México del Ajusco Medio; los Dinamos de Contreras; Cerro de la Estrella; Sierra de Santa Catarina; Sierra de Guadalupe; zonas lacustres de Xochimilco y Tláhuac; Parque Nacional Fuentes Brotantes; parques estratégicos de Chapultepec (tres secciones); Bosque de Tlalpan y Bosque de Aragón; así como las Áreas de Valor Ambiental decretadas y que se decreten. Estas áreas serán de acceso público."},
+    ],
+    areasProtegidas: [
+      "Desierto de los Leones",
+      "Parque Nacional Cumbres del Ajusco",
+      "Parque Ecológico de la Ciudad de México del Ajusco Medio",
+      "Los Dinamos de Contreras",
+      "Cerro de la Estrella",
+      "Sierra de Santa Catarina",
+      "Sierra de Guadalupe",
+      "Zonas lacustres de Xochimilco y Tláhuac",
+      "Parque Nacional Fuentes Brotantes",
+      "Parques estratégicos de Chapultepec (1ª, 2ª y 3ª secciones)",
+      "Bosque de Tlalpan",
+      "Bosque de Aragón",
+      "Áreas de Valor Ambiental decretadas y por decretarse",
+    ],
+    atribucionesAlcaldias: [
+      {fr:"XXI",   lbl:"Participar en la creación y administración de sus reservas territoriales."},
+      {fr:"XXII",  lbl:"Implementar acciones de protección, preservación y restauración del equilibrio ecológico que garanticen la conservación, integridad y mejora de los recursos naturales, suelo de conservación, áreas naturales protegidas, parques urbanos y áreas verdes de la demarcación territorial."},
+      {fr:"XXIII", lbl:"Diseñar e implementar, en coordinación con el Gobierno de la Ciudad de México, acciones que promuevan la innovación científica y tecnológica en materia de preservación y mejoramiento del medio ambiente."},
+      {fr:"XXIV",  lbl:"Vigilar, en coordinación con el Gobierno de la Ciudad de México, que no sean ocupadas de manera ilegal las áreas naturales protegidas y el suelo de conservación."},
+    ],
+  },
+  instrumento: {
+    nombre: "Ley Ambiental de la Ciudad de México",
+    abreviatura: "LACM",
+    publicacion: "Gaceta Oficial de la Ciudad de México · 18 de julio de 2024",
+    abroga: "Abroga la Ley Ambiental de Protección a la Tierra en la Ciudad de México.",
+    expedida: "Decreto expedido por la persona titular de la Jefatura de Gobierno de la Ciudad de México.",
+    url: "https://data.consejeria.cdmx.gob.mx/images/leyes/2025/2026/210126/LEY_AMBIENTAL_DE_LA_CDMX_1.2.pdf",
+    urlLabel: "Texto vigente (PDF · Consejería Jurídica CDMX)"
+  },
+  instrumentoFederal: {
+    nombre: "Ley General del Equilibrio Ecológico y la Protección al Ambiente",
+    abreviatura: "LGEEPA",
+    publicacion: "Cámara de Diputados del H. Congreso de la Unión",
+    ultimaReforma: "Última reforma publicada en el DOF el 19 de enero de 2026",
+    alcance: "Regula las ANP de jurisdicción federal (fracciones I a VIII y XI del Art. 46). Concurre con la LACM cuando el GCDMX administra ANP de competencia federal conforme al Art. 136 LACM. Establece el marco nacional al que se ajustan las legislaciones locales en materia de áreas naturales protegidas.",
+    url: "http://www.diputados.gob.mx/LeyesBiblio/pdf/LGEEPA.pdf",
+    urlLabel: "Texto vigente (PDF · Cámara de Diputados)"
+  },
+  definiciones: [
+    {t:"Área de Valor Ambiental (AVA)", ref:"Art. 4° fr. VI", c:"Todos los bosques urbanos, barrancas y cuerpos de agua dentro del territorio y bajo las competencias de la Ciudad de México, tanto en suelo urbano como en suelo de conservación, en donde los ambientes originales han sido modificados por las actividades antropogénicas y que requieren ser restauradas o preservadas, en función de que aún mantienen ciertas características biofísicas y escénicas, las cuales les permiten contribuir a mantener la calidad ambiental de la Ciudad."},
+    {t:"Área Natural Protegida (ANP)", ref:"Art. 4° fr. VII", c:"Las zonas del territorio y aquellas sobre las que la Ciudad de México ejerce su soberanía y jurisdicción, en donde los ambientes originales no han sido significativamente alterados por la actividad del ser humano o que requieren ser preservadas y restauradas y están sujetas al régimen previsto en la presente Ley."},
+    {t:"Área Comunitaria de Conservación Ecológica (ARCAS)", ref:"Art. 152 LACM", c:"Áreas establecidas por acuerdo de la persona titular de la Jefatura de Gobierno con ejidos y comunidades, manteniéndose como tal siempre que se cuente con el consentimiento de éstas expresado en Asamblea, así como con la suscripción del convenio de concertación de acciones suscrito con la Secretaría. La declaratoria no modifica el régimen de propiedad y no tendrá como propósito la expropiación."},
+    {t:"Programa de Manejo", ref:"Art. 4° fr. LIII", c:"El instrumento rector de planeación y regulación que establece los usos de suelo, las actividades, acciones y lineamientos básicos para el manejo y la administración de las Áreas de Valor Ambiental y las Áreas Naturales Protegidas de competencia de la Ciudad de México."},
+  ],
+  categoriasAVA: {titulo:"Categorías de Áreas de Valor Ambiental", ref:"Art. 116 · Capítulo IV", items:[
+    {lbl:"Bosques Urbanos",   ref:"Art. 117 — AVA localizadas en suelo urbano con predominio de flora arbórea y arbustiva; vida silvestre asociada; valor ambiental, estético, científico, educativo, recreativo, histórico o turístico."},
+    {lbl:"Cinturones Verdes", ref:"Art. 117 — delimitan poblados rurales y asentamientos humanos en suelo de conservación; crean bordes naturales que ordenan la expansión; espacios de recreación y esparcimiento."},
+    {lbl:"Barrancas",         ref:"Art. 120 — los PM pueden regular diferentes actividades siempre que garanticen restauración y preservación de características biofísicas y escénicas que contribuyen al balance hídrico."},
+    {lbl:"Cuerpos de Agua",   ref:"Art. 116 fr. IV — cuerpos de agua de competencia de la Ciudad de México."},
+  ]},
+  categoriasANPLocal: {titulo:"Categorías de ANP de competencia local", ref:"Art. 127 · Capítulo V", items:[
+    {lbl:"Zona de Conservación Ecológica (ZCE)",              ref:"Art. 128 — muestras representativas de uno o más ecosistemas en buen estado de preservación; protegen biodiversidad, elementos naturales y procesos ecológicos."},
+    {lbl:"Zona de Protección Hidrológica y Ecológica (ZPHE)", ref:"Art. 129 — protección, preservación y restauración de cuencas hidrológicas, acuíferos y zonas de recarga, así como fauna, flora, suelo, subsuelo y servicios ambientales."},
+    {lbl:"Zona Ecológica y Cultural (ZEC)",                   ref:"Art. 130 — importantes valores ambientales y ecológicos con elementos físicos, históricos, arqueológicos o sujetos a usos y costumbres de importancia cultural."},
+    {lbl:"Refugio de Vida Silvestre",                         ref:"Art. 131 — hábitat natural de especies de fauna y flora en categoría de protección especial o con distribución restringida."},
+    {lbl:"Zona de Protección Especial (ZPE)",                 ref:"Art. 132 — localizadas en suelo de conservación con escasa vegetación natural o fuertemente modificada; por extensión o características no caben en otras categorías."},
+    {lbl:"Reserva Ecológica Comunitaria (REC)",               ref:"Art. 133 — establecidas por pueblos, comunidades y ejidos en terrenos de su propiedad; no modifican el régimen de propiedad. Pueden ser en núcleos agrarios (a) o en propiedad privada (b)."},
+    {lbl:"Zona Sujeta a Conservación Ecológica (ZSCE)",       ref:"Art. 134 — circunvecinas a asentamientos humanos; ecosistemas en buen estado destinadas a preservar biodiversidad y equilibrio ecológico."},
+  ]},
+  categoriasANPFederal: {
+    titulo:"Tipos y características de las Áreas Naturales Protegidas Federales",
+    ref:"LGEEPA · Art. 46 · Sección II (última reforma DOF 19/01/2026)",
+    intro:"El Artículo 46 de la LGEEPA define las categorías de ANP de competencia federal que aplican en todo el territorio nacional, incluyendo la Ciudad de México.",
+    fracciones:[
+      {fr:"I",    lbl:"Reservas de la Biosfera",                       jur:"federal", c:"Ecosistemas representativos del territorio nacional; zonificación núcleo y amortiguamiento."},
+      {fr:"II",   lbl:"Derogada",                                      jur:"derogada", c:"Derogada mediante reforma DOF 13/12/1996."},
+      {fr:"III",  lbl:"Parques Nacionales",                            jur:"federal", c:"Representatividad biogeográfica a nivel nacional; valor científico, educativo, recreativo, histórico."},
+      {fr:"IV",   lbl:"Monumentos Naturales",                          jur:"federal", c:"Elementos naturales notables por su carácter único."},
+      {fr:"V",    lbl:"Derogada",                                      jur:"derogada", c:"Derogada mediante reforma DOF 13/12/1996."},
+      {fr:"VI",   lbl:"Áreas de Protección de Recursos Naturales",     jur:"federal", c:"APRN — Preservación y protección del suelo, cuencas hidrográficas, aguas y recursos forestales. Única categoría federal que admite coexistencia con declaratorias locales."},
+      {fr:"VII",  lbl:"Áreas de Protección de Flora y Fauna",          jur:"federal", c:"APFF — Hábitats de cuyo equilibrio dependen especies de flora y fauna silvestres."},
+      {fr:"VIII", lbl:"Santuarios",                                    jur:"federal", c:"Zonas con flora y fauna consideradas relevantes o en peligro."},
+      {fr:"IX",   lbl:"Parques y Reservas Estatales",                  jur:"local",    c:"Así como las demás categorías que establezcan las legislaciones locales (fracción reformada DOF 05/07/2007 y 16/05/2008)."},
+      {fr:"X",    lbl:"Zonas de Conservación Ecológica Municipales",   jur:"local",    c:"Así como las demás categorías que establezcan las legislaciones locales (fracción reformada DOF 16/05/2008)."},
+      {fr:"XI",   lbl:"Áreas destinadas voluntariamente a la conservación", jur:"federal", c:"Adicionada mediante reforma DOF 16/05/2008."},
+    ],
+    competencia:[
+      {lbl:"Competencia federal",    ref:"Fracciones I a VIII y XI del Art. 46 LGEEPA."},
+      {lbl:"Competencia estatal",    ref:"Entidades federativas pueden establecer parques, reservas y demás categorías que reúnan características de las fracciones I a VIII y XI o características propias, conforme a su legislación local."},
+      {lbl:"Competencia municipal",  ref:"Municipios pueden establecer zonas de conservación ecológica municipales conforme a la legislación local aplicable."},
+      {lbl:"Regla de no superposición", ref:"Las ANP locales no pueden establecerse en zonas previamente declaradas federales, salvo en la fracción VI (APRN)."},
+    ],
+    prohibiciones:[
+      {lbl:"Fundación de nuevos centros de población",           ref:"Art. 46 párr. aplicable — prohibición general en toda ANP."},
+      {lbl:"Introducción de especies exóticas invasoras",        ref:"Adición DOF 24/05/2013."},
+      {lbl:"Exploración, explotación y beneficio de minerales",  ref:"Obras y trabajos a que se refiere la Ley de Minería. Adición DOF 08/05/2023."},
+    ],
+  },
+  categoriasARCAS: {titulo:"Áreas Comunitarias de Conservación Ecológica (ARCAS)", ref:"Art. 152-158 · Capítulo VI", items:[
+    {lbl:"Establecimiento por acuerdo con ejidos/comunidades", ref:"Art. 152 — requiere consentimiento en Asamblea y convenio de concertación con la Secretaría."},
+    {lbl:"Declaratoria constitutiva publicada en GOCDMX", ref:"Art. 153 — no modifica el régimen de propiedad ni tiene propósito de expropiación."},
+    {lbl:"Administración y manejo por los ejidos o comunidades", ref:"Art. 155 — corresponde a quienes detenten la propiedad o legal posesión."},
+    {lbl:"Programa de manejo elaborado por el ejido/comunidad", ref:"Art. 157 — con asistencia opcional de instituciones; aprobado conjuntamente por la Secretaría y la Secretaría de Pueblos y Barrios Originarios y Comunidades Indígenas Residentes."},
+    {lbl:"Limitaciones y regulaciones de utilidad pública", ref:"Art. 158 — obligatorias para propietarios o poseedores de terrenos y bienes localizados en el área."},
+  ]},
+  declaratoriaAVA:{titulo:"Procedimiento de declaratoria — AVA", ref:"Art. 118-119", items:[
+    {lbl:"Solicitud por escrito a la Secretaría (cualquier persona); superficie continua o fragmentada, pública o privada.", ref:"Art. 118"},
+    {lbl:"Dictamen de procedencia por la Secretaría.", ref:"Art. 118"},
+    {lbl:"Opinión obligatoria de la o las Alcaldías correspondientes.", ref:"Art. 118"},
+    {lbl:"Elaboración de diagnóstico ambiental por la Secretaría para la formulación del PM.", ref:"Art. 118"},
+    {lbl:"Decreto expedido por la persona titular de la Jefatura de Gobierno (finalidad, limitaciones al uso del suelo, responsables del manejo, elementos naturales a restaurar).", ref:"Art. 119"},
+    {lbl:"Si incluye zonificación: opinión de SEDUVI y Consejería Jurídica.", ref:"Art. 119"},
+  ]},
+  declaratoriaANP:{titulo:"Procedimiento de declaratoria — ANP", ref:"Art. 139-143", items:[
+    {lbl:"Estudios técnicos justificativos previos, puestos a disposición del público.", ref:"Art. 139"},
+    {lbl:"Opinión de las Alcaldías correspondientes.", ref:"Art. 139"},
+    {lbl:"Decreto de la Jefatura con: categoría, delimitación, zonificación, limitaciones al uso de suelo, descripción de actividades, responsables, utilidad pública, lineamientos y plazo para el PM, elementos naturales a proteger.", ref:"Art. 140"},
+    {lbl:"Publicación en GOCDMX; notificación personal a propietarios/poseedores.", ref:"Art. 141"},
+    {lbl:"Inscripción en el Registro Público de la Propiedad y de Comercio y en el Registro de Planes y Programas para el Desarrollo Urbano.", ref:"Art. 142"},
+    {lbl:"Cualquier persona podrá solicitar el establecimiento de un ANP; la Secretaría dictamina su procedencia.", ref:"Art. 143"},
+  ]},
+  declaratoriaARCAS:{titulo:"Procedimiento de declaratoria — ARCAS", ref:"Art. 152-154", items:[
+    {lbl:"Consentimiento del ejido o comunidad expresado en Asamblea.", ref:"Art. 152"},
+    {lbl:"Suscripción del convenio de concertación de acciones con la Secretaría.", ref:"Art. 152"},
+    {lbl:"Acuerdo emitido por la persona titular de la Jefatura de Gobierno.", ref:"Art. 153"},
+    {lbl:"Declaratoria constitutiva; ambos instrumentos publicados en GOCDMX.", ref:"Art. 153"},
+    {lbl:"Contenido del convenio: finalidad, delimitación, obligaciones, lineamientos y plazo para el PM.", ref:"Art. 154"},
+  ]},
+  programaManejo:{titulo:"Contenido del Programa de Manejo", ref:"Art. 144 (ANP) / Art. 122 (AVA) / Art. 156 (ARCAS)", items:[
+    {lbl:"Características físicas, biológicas, climáticas, culturales, sociales y económicas del área.", ref:"fr. I"},
+    {lbl:"Objetivos del área.", ref:"fr. II"},
+    {lbl:"Zonificación y subzonificación con políticas de manejo diferenciadas por zona.", ref:"fr. III"},
+    {lbl:"Regulación de usos de suelo, manejo de recursos naturales y actividades compatibles.", ref:"fr. IV"},
+    {lbl:"Subprogramas de manejo (corto, mediano y largo plazo): conservación, recuperación, monitoreo, restauración, conectividad ecológica, investigación y educación ambiental.", ref:"fr. V"},
+    {lbl:"Bases para administración, mantenimiento y vigilancia.", ref:"fr. VI"},
+    {lbl:"Señalamiento de las disposiciones jurídicas ambientales aplicables.", ref:"fr. VII"},
+    {lbl:"Mecanismos de participación social.", ref:"fr. VIII"},
+    {lbl:"Mecanismos de financiamiento del área.", ref:"fr. IX"},
+    {lbl:"Seguimiento y evaluación del programa de manejo.", ref:"fr. X"},
+  ]},
+  prohibiciones:{titulo:"Prohibiciones en ANP y AVA", ref:"Art. 138 (ANP) · Art. 123 (AVA)", items:[
+    {lbl:"Establecimiento de asentamientos humanos irregulares, de nuevos regulares o su expansión territorial.", ref:"fr. I"},
+    {lbl:"Actividades que afecten la biodiversidad del área según Ley, reglamento, NOM, normas locales, decreto, PM o evaluación de impacto ambiental.", ref:"fr. II"},
+    {lbl:"Realización de actividades riesgosas.", ref:"fr. III"},
+    {lbl:"Emisiones contaminantes al aire, agua, suelo y subsuelo; depósito o disposición de residuos; uso de equipos anticontaminantes sin autorización.", ref:"fr. IV"},
+    {lbl:"Extracción de suelo o materiales del subsuelo con fines distintos a los estrictamente científicos.", ref:"fr. V"},
+    {lbl:"Interrupción o afectación del sistema hidrológico de la zona.", ref:"fr. VI"},
+    {lbl:"Actividades cinegéticas o de explotación ilícita de fauna y flora silvestres.", ref:"fr. VII"},
+    {lbl:"Introducción de especies exóticas, exóticas invasoras y ferales.", ref:"fr. VIII"},
+    {lbl:"En AVA adicionalmente: aprovechamiento o extracción de recursos naturales.", ref:"Art. 123"},
+  ]},
+  participacion:[
+    {lbl:"Consejo Rector Ciudadano (Bosques Urbanos)", ref:"Art. 124 — 7 a 14 ciudadanos designados por la Secretaría; 4 años, ratificables por 2 adicionales. Órgano de asesoría sobre programas, proyectos, PM y autorizaciones."},
+    {lbl:"Consejo Intersectorial (Barrancas)",          ref:"Art. 125 — máx. 7 integrantes del sector gobierno + representantes académico, empresarial y social. Gestiona y articula el diseño y ejecución de PM."},
+    {lbl:"Consejo Asesor (ANP)",                        ref:"Art. 151 — Secretaría + entidades GCDMX + Alcaldías + academia + sector social + empresarial + ejidos/comunidades + propietarios. Órgano de consulta y apoyo para formulación, ejecución, seguimiento y evaluación."},
+    {lbl:"Asamblea del ejido o comunidad (ARCAS)",       ref:"Art. 152 y 157 — órgano que otorga consentimiento para la declaratoria y valida el PM."},
+  ],
+  atribuciones:[
+    {lbl:"Jefatura de Gobierno",  ref:"Art. 6 — expedir decretos de AVA y ANP; proponer creación de áreas comunitarias de conservación ecológica, zonas de restauración y salvaguarda; promover conectividad ecológica; limitar o negar derribo/poda en suelo de conservación, AVA y ANP."},
+    {lbl:"Secretaría",            ref:"Proponer creación de AVA, ANP y ARCAS; administrar, manejar, vigilar; elaborar programas de manejo; expedir normas ambientales locales; gestionar ingresos por uso, goce, aprovechamiento y explotación."},
+    {lbl:"Alcaldías",             ref:"Art. 8 — prevenir invasión de áreas verdes, AVA y ANP; proponer y opinar sobre establecimiento de AVA y ANP; participar en elaboración de PM; celebrar convenios con GCDMX; integrar Consejos Asesores."},
+  ],
+  sistema:{
+    titulo:"Sistema de ANP y AVA de la Ciudad de México",
+    ref:"Art. 121, 149, 150",
+    items:[
+      {lbl:"Las AVA se integran junto con las ANP en el Sistema de ANP y AVA de la Ciudad de México.", ref:"Art. 121"},
+      {lbl:"Propósito: fortalecer la recuperación de las condiciones ecológicas, manejo integral y mejorar la conectividad conforme al Programa de la red de Infraestructura Verde.", ref:"Art. 121"},
+      {lbl:"La Secretaría integra el Registro de ANP de la Ciudad de México, consultable y conectado al Sistema de Información Ambiental.", ref:"Art. 149"},
+      {lbl:"Registro e inventario de ANP con datos de inscripción, resumen de decretos y PM; actualización anual.", ref:"Art. 150"},
+    ]
+  }
+};
+
+/* ===== Helpers ===== */
+const fmt = n => n.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtInt = n => n.toLocaleString('es-MX');
+const pct = (a,b) => b===0?'0':((a/b)*100).toFixed(1);
+const sum = (arr,k) => arr.reduce((s,d)=>s+(+d[k]||0),0);
+const explode = (arr,k) => arr.flatMap(d => d[k].split(/,\s*/).map(s=>s.trim()));
+
+/* Mapeo subcategoría → código de color y abreviatura */
+const SUBCAT = {
+  "Bosque Urbano":                              {code:"BU",   short:"Bosque Urbano"},
+  "Barranca":                                   {code:"BR",   short:"Barranca"},
+  "Zona de Conservación Ecológica":             {code:"ZCE",  short:"ZCE"},
+  "Zona de Protección Hidrológica y Ecológica": {code:"ZPHE", short:"ZPHE"},
+  "Zona Ecológica y Cultural":                  {code:"ZEC",  short:"ZEC"},
+  "Zona de Protección Especial":                {code:"ZPE",  short:"ZPE"},
+  "Reserva Ecológica Comunitaria":              {code:"REC",  short:"REC"},
+  "Zona Sujeta a Conservación Ecológica":       {code:"ZSCE", short:"ZSCE"},
+  "Refugio de Vida Silvestre":                  {code:"RVS",  short:"RVS"},
+  "Parque Nacional":                            {code:"PN",   short:"Parque Nacional"},
+  "Área de Protección de Recursos Naturales":   {code:"APRN", short:"APRN"},
+  "Reserva de la Biosfera":                     {code:"RB",   short:"Reserva Biosfera"},
+  "Monumento Natural":                          {code:"MN",   short:"Monumento Natural"},
+  "Área de Protección de Flora y Fauna":        {code:"APFF", short:"APFF"},
+  "Santuario":                                  {code:"SAN",  short:"Santuario"},
+};
+const subCode  = cat => (SUBCAT[cat] && SUBCAT[cat].code)  || "BU";
+const subShort = cat => (SUBCAT[cat] && SUBCAT[cat].short) || cat;
+
+let state = { tab:'ALL', sortKey:'nombre', sortDir:1, q:'', fJur:'', fCat:'', fAlc:'', fPM:'',
+  mapFilters:{ 'AVA · Bosque Urbano':true, 'AVA · Barranca':true, 'ANP · Local':true, 'ANP · Federal':true } };
+const currentGroup = () => GROUPS.find(g=>g.id===state.tab);
+const isSpecialTab = (id) => id==='LEGAL' || id==='METAS' || id==='ANALISIS';
+const currentData = () => {
+  if(state.tab==='ALL' || isSpecialTab(state.tab)) return DATA;
+  return DATA.filter(d=>d.grupo===currentGroup().key);
+};
+
+/* Iconos institucionales por categoría — SVG inline para identidad visual */
+const TAB_ICONS = {
+  ALL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+  BU: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L7 10 L9.5 10 L5.5 16 L9 16 L4.5 22 L19.5 22 L15 16 L18.5 16 L14.5 10 L17 10 Z"/><line x1="12" y1="22" x2="12" y2="17"/></svg>',
+  BR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 L7 8 L11 4 L13 4 L17 8 L21 6 L21 11 L17 19 L13 19 L11 14 L7 19 L3 11 Z"/></svg>',
+  ANPL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22 C12 22 18 14.5 18 9 C18 5.7 15.3 3 12 3 C8.7 3 6 5.7 6 9 C6 14.5 12 22 12 22 Z"/><circle cx="12" cy="9" r="2.6"/></svg>',
+  ANPF: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 L14.5 9.2 L21.5 9.5 L16 14 L17.8 21 L12 17 L6.2 21 L8 14 L2.5 9.5 L9.5 9.2 Z"/></svg>',
+  ANALISIS: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="5" y="11" width="3" height="9"/><rect x="10.5" y="6" width="3" height="14"/><rect x="16" y="14" width="3" height="6"/></svg>',
+  METAS: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg>',
+  LEGAL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M6 6 L3 13 H9 L6 6"/><path d="M18 6 L15 13 H21 L18 6"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="6" x2="12" y2="3"/></svg>'
+};
+
+function buildTabs(){
+  const el = document.getElementById('tabs');
+  el.innerHTML = GROUPS.map(g=>{
+    let subtitle;
+    if(g.id==='LEGAL') subtitle = 'LACM · 18 JUL 2024';
+    else if(g.id==='METAS') subtitle = 'LÍNEA BASE 2018-2024';
+    else if(g.id==='ANALISIS') subtitle = 'DATOS · DISTRIBUCIÓN';
+    else {
+      const subset = g.id==='ALL' ? DATA : DATA.filter(d=>d.grupo===g.key);
+      subtitle = `${subset.length} REG · ${fmt(sum(subset,'superficie'))} HA`;
+    }
+    return `<button class="tab ${g.cls||''} ${state.tab===g.id?'active':''}" data-id="${g.id}" aria-label="Ver ${g.label}" title="${g.label}">
+      <span class="tab-icon" aria-hidden="true">${TAB_ICONS[g.id]||''}</span>
+      <span class="tab-content">
+        <span class="tab-name">${g.label}</span>
+        <span class="tab-num">${subtitle}</span>
+      </span>
+    </button>`;
+  }).join('');
+  el.querySelectorAll('.tab').forEach(b=>{
+    b.addEventListener('click',()=>{
+      state.tab = b.dataset.id;
+      state.q=''; state.fJur=''; state.fCat=''; state.fAlc=''; state.fPM='';
+      ['q','fJur','fCat','fAlc','fPM'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=''; });
+      buildTabs(); populateFilters(); renderDashboard(); render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+}
+
+function populateFilters(){
+  if(isSpecialTab(state.tab)) return;
+  const subset = currentData();
+  const cats = [...new Set(subset.map(d=>d.categoria))].sort((a,b)=>a.localeCompare(b,'es'));
+  const alcs = [...new Set(explode(subset,'alcaldia'))].sort((a,b)=>a.localeCompare(b,'es'));
+  document.getElementById('fCat').innerHTML = '<option value="">Todas</option>'+cats.map(c=>`<option>${c}</option>`).join('');
+  document.getElementById('fAlc').innerHTML = '<option value="">Todas</option>'+alcs.map(a=>`<option>${a}</option>`).join('');
+}
+
+function renderDashboard(){
+  const g = currentGroup();
+  const dash = document.getElementById('dashboard');
+  const tblSec = document.getElementById('tableSection');
+  const mapSec = document.getElementById('globalMapSection');
+  if(g.id==='LEGAL'){
+    dash.innerHTML = renderLegalDashboard();
+    tblSec.style.display = 'none';
+    if(mapSec) mapSec.style.display = 'none';
+  } else if(g.id==='METAS'){
+    dash.innerHTML = renderMetasPage();
+    tblSec.style.display = 'none';
+    if(mapSec) mapSec.style.display = 'none';
+  } else if(g.id==='ANALISIS'){
+    dash.innerHTML = renderAnalisisPage();
+    tblSec.style.display = 'none';
+    if(mapSec) mapSec.style.display = 'none';
+  } else {
+    tblSec.style.display = '';
+    dash.innerHTML = g.id==='ALL' ? renderGlobalDashboard() : renderGroupDashboard(g);
+    // Mapa: visible en TODAS las pestañas no especiales (Global y categorías)
+    if(mapSec){
+      mapSec.style.display = '';
+      // Re-render del header del mapa con título contextual al grupo activo
+      mapSec.innerHTML = renderMapaPage(g);
+
+      // Configura filtros del mapa: ALL → todos visibles; categoría → solo ese grupo
+      const allKeys = ['AVA · Bosque Urbano','AVA · Barranca','ANP · Local','ANP · Federal'];
+      if(g.id === 'ALL'){
+        allKeys.forEach(k => state.mapFilters[k] = true);
+      } else {
+        allKeys.forEach(k => state.mapFilters[k] = (k === g.key));
+      }
+
+      setTimeout(() => {
+        if(!GEOMETRIES) loadGeometries();
+        if(g.id === 'ALL') renderMapFilters();
+        initGlobalMap();
+      }, 100);
+    }
+  }
+}
+
+function renderGlobalDashboard(){
+  const total = DATA.length;
+  const totArea = sum(DATA,'superficie');
+  const withPM = DATA.filter(d=>d.programa_manejo==='Sí').length;
+  const withoutPM = total - withPM;
+  const ava = DATA.filter(d=>d.tipo==='AVA').length;
+  const anp = DATA.filter(d=>d.tipo==='ANP').length;
+
+  return `
+    <div class="hero">
+      <div class="hero-card"><div class="hero-label">Total de áreas</div><div class="hero-value">${fmtInt(total)}</div><div class="hero-sub">${ava} AVA · ${anp} ANP</div></div>
+      <div class="hero-card"><div class="hero-label">Superficie total</div><div class="hero-value">${fmt(totArea)}<span class="u">ha</span></div><div class="hero-sub">${fmt(totArea/100)} km²</div></div>
+      <div class="hero-card"><div class="hero-label">Con programa de manejo</div><div class="hero-value">${withPM}<span class="u">/${total}</span></div><div class="hero-sub">${pct(withPM,total)}% del total</div></div>
+      <div class="hero-card"><div class="hero-label">Sin programa de manejo</div><div class="hero-value" style="color:var(--rojo)">${withoutPM}<span class="u">/${total}</span></div><div class="hero-sub">${pct(withoutPM,total)}% requiere atención</div></div>
+    </div>
+  `;
+}
+
+/* ===== Página Metas: envoltura con encabezado propio ===== */
+function renderMetasPage(){
+  return renderMetaComparable();
+}
+
+/* ===== Página Análisis: distribución, territorial, hitos, década ===== */
+function renderAnalisisPage(){
+  const total = DATA.length;
+  const totArea = sum(DATA,'superficie');
+
+  // 1. Distribución por tipo y jurisdicción
+  const maxArea = Math.max(...GROUPS.filter(g=>!['ALL','LEGAL','METAS','ANALISIS'].includes(g.id)).map(g=>sum(DATA.filter(d=>d.grupo===g.key),'superficie')));
+  const distRows = GROUPS.filter(g=>!['ALL','LEGAL','METAS','ANALISIS'].includes(g.id)).map(g=>{
+    const arr = DATA.filter(d=>d.grupo===g.key);
+    const s = sum(arr,'superficie');
+    const pmSi = arr.filter(d=>d.programa_manejo==='Sí').length;
+    const pmNo = arr.length - pmSi;
+    return `<tr>
+      <td class="grp"><span class="chip ${g.cls}"></span>${g.label}</td>
+      <td class="num">${fmtInt(arr.length)}</td>
+      <td class="num">${fmt(s)}</td>
+      <td class="num">${pmSi} / ${arr.length}</td>
+      <td class="num" style="color:var(--rojo)">${pmNo}</td>
+      <td style="min-width:140px"><div class="share"><div class="share-fill ${g.cls}" style="width:${(s/maxArea)*100}%"></div></div></td>
+      <td class="num">${((s/totArea)*100).toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+
+  // 2. Áreas por alcaldía
+  const alcCount = {};
+  DATA.forEach(d => explode([d],'alcaldia').forEach(a=>{
+    const key = a.split(' (')[0];
+    alcCount[key] = (alcCount[key]||0)+1;
+  }));
+  const alcSorted = Object.entries(alcCount).sort((a,b)=>b[1]-a[1]);
+  const maxAlc = Math.max(...alcSorted.map(x=>x[1]));
+
+  // 3. Hitos
+  const oldest = [...DATA].sort((a,b)=>a.fecha_decreto_iso.localeCompare(b.fecha_decreto_iso))[0];
+  const newest = [...DATA].sort((a,b)=>b.fecha_decreto_iso.localeCompare(a.fecha_decreto_iso))[0];
+  const biggest = [...DATA].sort((a,b)=>b.superficie-a.superficie)[0];
+
+  // 4. Distribución por década
+  const decadeCount = {};
+  DATA.forEach(d=>{
+    const y = parseInt(d.fecha_decreto_iso.slice(0,4));
+    if(isNaN(y)) return;
+    const dec = Math.floor(y/10)*10;
+    decadeCount[dec] = (decadeCount[dec]||0)+1;
+  });
+  const decades = Object.keys(decadeCount).map(Number).sort();
+  const minDec = Math.min(...decades), maxDec = Math.max(...decades);
+  const allDecs = []; for(let d=minDec; d<=maxDec; d+=10) allDecs.push(d);
+  const maxDecCount = Math.max(...Object.values(decadeCount));
+
+  return `
+    <div class="panel" style="border-left:3px solid var(--guinda)">
+      <div class="panel-title" style="color:var(--guinda)">Análisis del sistema · Datos comparativos y temporales</div>
+      <h3>Composición, distribución <em>territorial</em> y línea histórica</h3>
+      <p class="panel-intro" style="margin-top:8px">Información complementaria para análisis técnico, presentaciones y procesos de planeación. Cada panel está disponible para consulta individual o exportación.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Composición del sistema</div>
+      <h3>Distribución por <em>tipo y jurisdicción</em></h3>
+      <p class="panel-intro" style="margin-top:8px;margin-bottom:0">Comparativo de los cuatro grupos institucionales que integran el sistema: número de áreas, superficie acumulada, cobertura del Programa de Manejo y peso relativo en el total.</p>
+      <div class="comp-scroll" style="margin-top:18px">
+        <table class="comp">
+          <thead><tr><th>Grupo</th><th style="text-align:right">Áreas</th><th style="text-align:right">Sup. total (ha)</th><th style="text-align:right" title="Con Programa de Manejo">Con PM</th><th style="text-align:right" title="Sin Programa de Manejo">Sin PM</th><th>Proporción</th><th style="text-align:right">% total</th></tr></thead>
+          <tbody>${distRows}</tbody>
+          <tfoot><tr style="border-top:2px solid var(--guinda)">
+            <td class="grp" style="font-weight:600">Total</td>
+            <td class="num" style="font-weight:600">${fmtInt(total)}</td>
+            <td class="num" style="font-weight:600">${fmt(totArea)}</td>
+            <td class="num" style="font-weight:600">${DATA.filter(d=>d.programa_manejo==='Sí').length} / ${total}</td>
+            <td class="num" style="font-weight:600;color:var(--rojo)">${DATA.filter(d=>d.programa_manejo!=='Sí').length}</td>
+            <td></td>
+            <td class="num" style="font-weight:600">100%</td>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel panel-compact">
+      <div class="panel-title">Territorial · detallado</div>
+      <h3>Áreas por <em>alcaldía</em></h3>
+      <p class="panel-intro" style="margin-top:8px;margin-bottom:14px">Conteo de polígonos presentes en cada demarcación territorial. Una misma área puede contabilizarse en más de una alcaldía si su superficie cruza límites administrativos.</p>
+      <div class="dist">
+        ${alcSorted.map(([k,v])=>`
+          <div class="bar-row">
+            <span class="lbl">${k}</span>
+            <div class="track"><div class="fill" style="width:${(v/maxAlc)*100}%"></div></div>
+            <span class="v">${v} áreas</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel panel-compact">
+        <div class="panel-title">Línea del tiempo</div>
+        <h3>Hitos de <em>decreto</em></h3>
+        <table class="hitos-table" style="margin-top:12px">
+          <tbody>
+            <tr>
+              <th>Más antiguo</th>
+              <td class="hitos-val">${oldest.fecha_decreto_iso.slice(0,4)}</td>
+              <td class="hitos-ctx">${oldest.nombre}</td>
+            </tr>
+            <tr>
+              <th>Más reciente</th>
+              <td class="hitos-val">${newest.fecha_decreto_iso.slice(0,4)}</td>
+              <td class="hitos-ctx">${newest.nombre}</td>
+            </tr>
+            <tr>
+              <th>Mayor superficie</th>
+              <td class="hitos-val">${fmt(biggest.superficie)} <span class="hitos-u">ha</span></td>
+              <td class="hitos-ctx">${biggest.nombre}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="panel-note">
+          Posible doble conteo en zonas de traslape federal–local (p. ej. Cerro de la Estrella, Sierra de Santa Catarina).
+        </div>
+      </div>
+      <div class="panel panel-compact">
+        <div class="panel-title">Histórico</div>
+        <h3>Decretos por <em>década</em></h3>
+        <p class="panel-intro" style="margin-top:8px;margin-bottom:12px">Distribución temporal de los actos jurídicos de creación de las áreas del sistema.</p>
+        <div class="dist">
+          ${allDecs.map(d=>{
+            const c = decadeCount[d]||0;
+            return `<div class="bar-row">
+              <span class="lbl" style="font-family:'Roboto Mono',monospace">${d}s</span>
+              <div class="track"><div class="fill" style="width:${(c/maxDecCount)*100}%"></div></div>
+              <span class="v">${c} ${c===1?'área':'áreas'}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ===== Meta comparable: línea base 2018-2024 vs administración actual ===== */
+function enPeriodo(fechaIso, desde, hasta){
+  if(!fechaIso) return false;
+  return fechaIso >= desde && fechaIso <= hasta;
+}
+function computeAdminStats(desde, hasta){
+  const dec = {BU:[],BR:[],ANPL:[],ANPF:[]};
+  const pm  = {BU:[],BR:[],ANPL:[],ANPF:[]};
+  DATA.forEach(d=>{
+    const g = d.grupo.includes('Bosque Urbano')?'BU':d.grupo.includes('Barranca')?'BR':d.grupo.includes('Federal')?'ANPF':'ANPL';
+    if(enPeriodo(d.fecha_decreto_iso, desde, hasta)) dec[g].push(d);
+    if(enPeriodo(d.fecha_pm_iso, desde, hasta)) pm[g].push(d);
+  });
+  return {dec, pm};
+}
+
+function renderMetaComparable(){
+  // Administración anterior: Claudia Sheinbaum + Martí Batres (5 dic 2018 – 5 dic 2024)
+  const anterior = computeAdminStats('2018-12-05', '2024-12-05');
+  // Administración actual: Clara Brugada (5 dic 2024 – en curso)
+  const hoyIso = new Date().toISOString().slice(0,10);
+  const actual = computeAdminStats('2024-12-05', hoyIso);
+
+  const decAntLoc = anterior.dec.BU.length + anterior.dec.BR.length + anterior.dec.ANPL.length;
+  const decAntFed = anterior.dec.ANPF.length;
+  const pmAntLoc  = anterior.pm.BU.length + anterior.pm.BR.length + anterior.pm.ANPL.length;
+  const pmAntFed  = anterior.pm.ANPF.length;
+
+  const decActLoc = actual.dec.BU.length + actual.dec.BR.length + actual.dec.ANPL.length;
+  const decActFed = actual.dec.ANPF.length;
+  const pmActLoc  = actual.pm.BU.length + actual.pm.BR.length + actual.pm.ANPL.length;
+  const pmActFed  = actual.pm.ANPF.length;
+
+  const decPromedio = (decAntLoc/6).toFixed(2);
+  const pmPromedio  = (pmAntLoc/6).toFixed(2);
+
+  const listaPMAnt = [...anterior.pm.BU, ...anterior.pm.BR, ...anterior.pm.ANPL]
+    .sort((a,b)=>a.fecha_pm_iso.localeCompare(b.fecha_pm_iso))
+    .map(d=>`<li><span class="lbl">${d.nombre}</span><span class="ref">${d.fecha_pm} · ${d.grupo.replace('AVA · ','').replace('ANP · ','')}</span></li>`).join('');
+  const listaDecretosAnt = [...anterior.dec.BU, ...anterior.dec.BR, ...anterior.dec.ANPL]
+    .sort((a,b)=>a.fecha_decreto_iso.localeCompare(b.fecha_decreto_iso))
+    .map(d=>`<li><span class="lbl">${d.nombre}</span><span class="ref">${d.fecha_decreto} · ${d.grupo.replace('AVA · ','').replace('ANP · ','')}</span></li>`).join('');
+
+  const listaActualPM = [...actual.pm.BU, ...actual.pm.BR, ...actual.pm.ANPL]
+    .map(d=>`<li><span class="lbl">${d.nombre}</span><span class="ref">${d.fecha_pm} · ${d.grupo.replace('AVA · ','').replace('ANP · ','')}</span></li>`).join('') || '<li style="color:var(--muted);font-style:italic">Aún sin PM publicados en el portal.</li>';
+  const listaActualDec = [...actual.dec.BU, ...actual.dec.BR, ...actual.dec.ANPL]
+    .map(d=>`<li><span class="lbl">${d.nombre}</span><span class="ref">${d.fecha_decreto} · ${d.grupo.replace('AVA · ','').replace('ANP · ','')}</span></li>`).join('') || '<li style="color:var(--muted);font-style:italic">Aún sin decretos emitidos.</li>';
+
+  return `
+    <div class="panel meta-block">
+      <div class="panel-title" style="color:var(--guinda)">Planeación sexenal · Línea base comparable</div>
+      <h3>Metas de <em>gobierno ambiental</em></h3>
+      <p class="panel-intro">Indicadores comparativos entre la administración anterior (<b>2018-2024</b>) y la administración actual (<b>2024-2030</b>), construidos a partir del inventario de decretos y Programas de Manejo de AVA y ANP de competencia de la Ciudad de México. Excluye instrumentos federales (CONANP). Las cifras se actualizan automáticamente conforme se registran nuevos instrumentos.</p>
+
+      <div class="meta-hero">
+        <div class="meta-col meta-col-base">
+          <div class="meta-col-head">
+            <span class="meta-period">2018 — 2024</span>
+            <span class="meta-label">Línea base · 6 años</span>
+          </div>
+          <div class="meta-stats">
+            <div class="meta-stat"><div class="meta-n">${decAntLoc}</div><div class="meta-t">Decretos locales emitidos</div></div>
+            <div class="meta-stat"><div class="meta-n">${pmAntLoc}</div><div class="meta-t">Programas de Manejo publicados</div></div>
+          </div>
+          <div class="meta-rate">
+            <span>Promedio: <b>${decPromedio}</b> decretos/año · <b>${pmPromedio}</b> PM/año</span>
+          </div>
+        </div>
+        <div class="meta-arrow">→</div>
+        <div class="meta-col meta-col-goal">
+          <div class="meta-col-head">
+            <span class="meta-period">2024 — 2030</span>
+            <span class="meta-label">Administración actual · meta por superar</span>
+          </div>
+          <div class="meta-stats">
+            <div class="meta-stat"><div class="meta-n meta-actual">${decActLoc}</div><div class="meta-t">Decretos locales emitidos</div></div>
+            <div class="meta-stat"><div class="meta-n meta-actual">${pmActLoc}</div><div class="meta-t">Programas de Manejo publicados</div></div>
+          </div>
+          <div class="meta-rate">
+            <span>Meta mínima: <b>superar 12 decretos y 3 PM</b> en el sexenio</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-breakdown">
+        <div class="meta-card">
+          <div class="meta-card-title">Desglose 2018-2024 · ${decAntLoc} decretos locales</div>
+          <div class="meta-tags">
+            <span class="meta-tag tag-sub sub-BU">${anterior.dec.BU.length} Bosques Urbanos</span>
+            <span class="meta-tag tag-sub sub-BR">${anterior.dec.BR.length} Barrancas</span>
+            <span class="meta-tag tag-sub sub-ZCE">${anterior.dec.ANPL.length} ANP Local</span>
+          </div>
+          <details class="meta-details">
+            <summary>Ver decretos emitidos</summary>
+            <ul class="meta-list">${listaDecretosAnt}</ul>
+          </details>
+        </div>
+        <div class="meta-card">
+          <div class="meta-card-title">Desglose 2018-2024 · ${pmAntLoc} Programas de Manejo</div>
+          <div class="meta-tags">
+            <span class="meta-tag tag-sub sub-BU">${anterior.pm.BU.length} Bosques Urbanos</span>
+            <span class="meta-tag tag-sub sub-BR">${anterior.pm.BR.length} Barrancas</span>
+            <span class="meta-tag tag-sub sub-ZCE">${anterior.pm.ANPL.length} ANP Local</span>
+          </div>
+          <details class="meta-details">
+            <summary>Ver PM publicados</summary>
+            <ul class="meta-list">${listaPMAnt}</ul>
+          </details>
+        </div>
+      </div>
+
+      <div class="meta-breakdown">
+        <div class="meta-card meta-current">
+          <div class="meta-card-title">Decretos emitidos en administración actual</div>
+          <ul class="meta-list">${listaActualDec}</ul>
+        </div>
+        <div class="meta-card meta-current">
+          <div class="meta-card-title">Programas de Manejo publicados en administración actual</div>
+          <ul class="meta-list">${listaActualPM}</ul>
+        </div>
+      </div>
+
+      <div class="meta-ref">Referencia federal (CONANP, no contabilizable para meta local): ${decAntFed} decreto y ${pmAntFed} PM en 2018-2024 · ${decActFed} decreto y ${pmActFed} PM en 2024-2030.</div>
+    </div>
+  `;
+}
+
+function renderGroupDashboard(g){
+  const arr = DATA.filter(d=>d.grupo===g.key);
+  const total = arr.length;
+  const totArea = sum(arr,'superficie');
+  const pmSi = arr.filter(d=>d.programa_manejo==='Sí').length;
+  const pmNo = total - pmSi;
+  const tipo = arr[0].tipo, jur = arr[0].jurisdiccion;
+
+  return `
+    <div class="hero">
+      <div class="hero-card ${g.cls}"><div class="hero-label">${g.label} · ${tipo} ${jur}</div><div class="hero-value">${fmtInt(total)}</div><div class="hero-sub">áreas decretadas</div></div>
+      <div class="hero-card ${g.cls}"><div class="hero-label">Superficie total</div><div class="hero-value">${fmt(totArea)}<span class="u">ha</span></div><div class="hero-sub">${fmt(totArea/100)} km²</div></div>
+      <div class="hero-card ${g.cls}"><div class="hero-label">Con programa de manejo</div><div class="hero-value">${pmSi}<span class="u">/${total}</span></div><div class="hero-sub">${pct(pmSi,total)}% cuenta con PM</div></div>
+      <div class="hero-card ${g.cls}"><div class="hero-label">Sin programa de manejo</div><div class="hero-value" style="color:var(--rojo)">${pmNo}<span class="u">/${total}</span></div><div class="hero-sub">${pct(pmNo,total)}% requiere atención</div></div>
+    </div>
+  `;
+}
+
+function legalList(items, variant=''){
+  const cls = variant ? `legal-list legal-list-${variant}` : 'legal-list';
+  return `<div class="${cls}"><ul>${items.map(i=>`<li><span class="lbl">${i.lbl}</span><span class="ref">${i.ref}</span></li>`).join('')}</ul></div>`;
+}
+function renderLegalDashboard(){
+  const defCards = LEGAL.definiciones.map(d=>`
+    <div class="legal-card">
+      <span class="l-art">${d.ref}</span>
+      <h4>${d.t}</h4>
+      <p>${d.c}</p>
+    </div>`).join('');
+  return `
+    <div class="panel constitucion-block">
+      <div class="panel-title" style="color:var(--guinda)">Marco constitucional · Norma suprema local</div>
+      <h3>${LEGAL.constitucion.nombre}</h3>
+      <p class="panel-intro">${LEGAL.constitucion.publicacion}. ${LEGAL.constitucion.ultimaReforma}.<br><b>${LEGAL.constitucion.articulo}</b></p>
+      <div class="constitucion-grid">
+        ${LEGAL.constitucion.parrafos.map(p=>`
+          <div class="constitucion-card">
+            <span class="l-art">${p.ref}</span>
+            <h4>${p.t}</h4>
+            <p>${p.c}</p>
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:26px">
+        <div class="panel-title" style="color:var(--guinda)">Atribuciones de las Alcaldías en protección ambiental</div>
+        <h4 style="font-family:'Roboto',sans-serif;font-weight:700;font-size:18px;color:var(--ink);margin-bottom:8px;letter-spacing:-.01em">Artículo 53 Apartado A · fracciones XXI-XXIV CPCDMX</h4>
+        <ul style="list-style:none;padding:0;margin:10px 0 0 0">
+          ${LEGAL.constitucion.atribucionesAlcaldias.map(a=>`
+            <li style="padding:10px 0;border-bottom:1px dotted var(--line-soft);display:grid;grid-template-columns:78px 1fr;gap:14px;align-items:baseline;font-size:13.5px;color:var(--ink-2);line-height:1.55">
+              <span style="font-family:'Roboto Mono',monospace;font-size:11.5px;color:var(--guinda);font-weight:500;letter-spacing:.04em;white-space:nowrap">fr. ${a.fr}</span>
+              <span>${a.lbl}</span>
+            </li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <div class="legal-grid">
+      <div class="panel panel-accent-anp">
+        <div class="panel-title">Instrumento rector · Norma reglamentaria local</div>
+        <h3>${LEGAL.instrumento.nombre}</h3>
+        <p class="panel-intro">${LEGAL.instrumento.publicacion}. <b>${LEGAL.instrumento.abroga}</b> ${LEGAL.instrumento.expedida} Este módulo sistematiza el Capítulo IV (AVA), Capítulo V (ANP) y Capítulo VI (ARCAS), definiciones del Art. 4°, atribuciones de autoridades (Arts. 6 y 8) y disposiciones sobre programas de manejo, prohibiciones y órganos de participación.</p>
+        <a class="ley-link ley-link-local" href="${LEGAL.instrumento.url}" target="_blank" rel="noopener">
+          <span class="ley-link-ico">↗</span>
+          <span class="ley-link-txt"><b>${LEGAL.instrumento.abreviatura}</b> · ${LEGAL.instrumento.urlLabel}</span>
+        </a>
+      </div>
+      <div class="panel" style="border-left:3px solid var(--azul)">
+        <div class="panel-title" style="color:var(--azul)">Instrumento concurrente · Norma reglamentaria federal</div>
+        <h3>${LEGAL.instrumentoFederal.nombre}</h3>
+        <p class="panel-intro"><b>${LEGAL.instrumentoFederal.abreviatura}</b>. ${LEGAL.instrumentoFederal.publicacion}. ${LEGAL.instrumentoFederal.ultimaReforma}. ${LEGAL.instrumentoFederal.alcance}</p>
+        <a class="ley-link ley-link-federal" href="${LEGAL.instrumentoFederal.url}" target="_blank" rel="noopener">
+          <span class="ley-link-ico">↗</span>
+          <span class="ley-link-txt"><b>${LEGAL.instrumentoFederal.abreviatura}</b> · ${LEGAL.instrumentoFederal.urlLabel}</span>
+        </a>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Definiciones fundamentales · Art. 4°</div>
+      <h3>Glosario <em>técnico-jurídico</em></h3>
+      <div class="legal-grid" style="margin-top:18px">${defCards}</div>
+    </div>
+    <div class="legal-grid">
+      <div class="panel panel-accent-ava">
+        <div class="panel-title">${LEGAL.categoriasAVA.ref}</div>
+        <h3>${LEGAL.categoriasAVA.titulo}</h3>
+        ${legalList(LEGAL.categoriasAVA.items)}
+      </div>
+      <div class="panel panel-accent-anp">
+        <div class="panel-title">${LEGAL.categoriasANPLocal.ref}</div>
+        <h3>${LEGAL.categoriasANPLocal.titulo}</h3>
+        ${legalList(LEGAL.categoriasANPLocal.items)}
+      </div>
+    </div>
+    <div class="panel panel-compact" style="border-left:3px solid var(--azul)">
+      <div class="panel-title" style="color:var(--azul)">${LEGAL.categoriasANPFederal.ref}</div>
+      <h3>${LEGAL.categoriasANPFederal.titulo}</h3>
+      <p class="panel-intro" style="margin-bottom:10px">${LEGAL.categoriasANPFederal.intro}</p>
+      <ul class="fracciones-list">
+        ${LEGAL.categoriasANPFederal.fracciones.filter(f=>f.jur==='federal').map(f=>`
+          <li class="fr-item">
+            <span class="fr-num">fr. ${f.fr}</span>
+            <div class="fr-body">
+              <span class="fr-lbl">${f.lbl}</span>
+              <span class="fr-desc">${f.c}</span>
+            </div>
+          </li>`).join('')}
+      </ul>
+      <a class="ley-link ley-link-federal" href="${LEGAL.instrumentoFederal.url}" target="_blank" rel="noopener">
+        <span class="ley-link-ico">↗</span>
+        <span class="ley-link-txt">Consultar artículo completo · <b>LGEEPA Art. 46</b></span>
+      </a>
+    </div>
+    <div class="panel" style="border-left:3px solid var(--verde)">
+      <div class="panel-title" style="color:var(--verde)">${LEGAL.categoriasARCAS.ref}</div>
+      <h3>${LEGAL.categoriasARCAS.titulo}</h3>
+      <p class="panel-intro">Figura jurídica distinta a las ANP y AVA, regulada en el Capítulo VI de la LACM. Se establece por acuerdo de la Jefatura de Gobierno con ejidos y comunidades, manteniéndose como tal siempre que exista el consentimiento expresado en Asamblea. Su administración y manejo corresponde directamente al ejido o comunidad, sin modificar el régimen de propiedad.</p>
+      ${legalList(LEGAL.categoriasARCAS.items)}
+    </div>
+    <div class="legal-grid-3">
+      <div class="panel">
+        <div class="panel-title">${LEGAL.declaratoriaAVA.ref}</div>
+        <h3>${LEGAL.declaratoriaAVA.titulo}</h3>
+        ${legalList(LEGAL.declaratoriaAVA.items)}
+      </div>
+      <div class="panel">
+        <div class="panel-title">${LEGAL.declaratoriaANP.ref}</div>
+        <h3>${LEGAL.declaratoriaANP.titulo}</h3>
+        ${legalList(LEGAL.declaratoriaANP.items)}
+      </div>
+      <div class="panel">
+        <div class="panel-title">${LEGAL.declaratoriaARCAS.ref}</div>
+        <h3>${LEGAL.declaratoriaARCAS.titulo}</h3>
+        ${legalList(LEGAL.declaratoriaARCAS.items)}
+      </div>
+    </div>
+    <div class="panel panel-compact">
+      <div class="panel-title">${LEGAL.programaManejo.ref}</div>
+      <h3>${LEGAL.programaManejo.titulo}</h3>
+      <p class="panel-intro" style="margin-bottom:10px">El Programa de Manejo es el instrumento rector de planeación y regulación. Mientras no se expida, la Secretaría actuará conforme a la normativa aplicable y criterios emitidos mediante acuerdo administrativo. En ARCAS, el PM es elaborado por el propio ejido o comunidad y aprobado conjuntamente por la Secretaría y la Secretaría de Pueblos y Barrios Originarios y Comunidades Indígenas Residentes (Art. 157).</p>
+      ${legalList(LEGAL.programaManejo.items, 'compact')}
+    </div>
+    <div class="panel panel-compact">
+      <div class="panel-title">${LEGAL.prohibiciones.ref}</div>
+      <h3>${LEGAL.prohibiciones.titulo}</h3>
+      ${legalList(LEGAL.prohibiciones.items, 'compact')}
+    </div>
+    <div class="panel panel-compact">
+      <div class="panel-title">${LEGAL.sistema.ref}</div>
+      <h3>${LEGAL.sistema.titulo}</h3>
+      ${legalList(LEGAL.sistema.items, 'compact')}
+    </div>
+    <div class="legal-grid">
+      <div class="panel">
+        <div class="panel-title">Participación social · Arts. 124, 125, 151, 152</div>
+        <h3>Órganos de <em>participación</em></h3>
+        ${legalList(LEGAL.participacion)}
+      </div>
+      <div class="panel">
+        <div class="panel-title">Distribución de competencias · Arts. 6, 7, 8</div>
+        <h3>Atribuciones <em>institucionales</em></h3>
+        ${legalList(LEGAL.atribuciones)}
+      </div>
+    </div>
+    <div class="panel" style="border-left:3px solid var(--legal)">
+      <div class="panel-title" style="color:var(--legal)">Nota de consulta</div>
+      <p style="color:var(--ink-2);font-size:13.5px;line-height:1.65;margin:0;max-width:900px">Este módulo tiene fines de consulta operativa. La jerarquía normativa aplicable en orden descendente es: (1) <b>Constitución Política de la Ciudad de México</b> — Art. 16 A; (2) <b>Ley Ambiental de la Ciudad de México</b> — publicada en la GOCDMX el 18 de julio de 2024 (que abroga la Ley Ambiental de Protección a la Tierra en la Ciudad de México); (3) decretos específicos de declaratoria de cada área; y (4) programas de manejo respectivos. En ANP de jurisdicción federal aplica la <b>LGEEPA</b> y su Reglamento en materia de ANP.</p>
+    </div>
+  `;
+}
+
+/* ===== Table ===== */
+function filter(){
+  const base = currentData();
+  const q = state.q.toLowerCase().trim();
+  return base.filter(d=>{
+    if(state.fJur && d.jurisdiccion!==state.fJur) return false;
+    if(state.fCat && d.categoria!==state.fCat) return false;
+    if(state.fAlc && !d.alcaldia.toLowerCase().includes(state.fAlc.toLowerCase())) return false;
+    if(state.fPM && d.programa_manejo!==state.fPM) return false;
+    if(q){
+      const hay = `${d.nombre} ${d.tipo} ${d.jurisdiccion} ${d.categoria} ${d.alcaldia} ${d.fecha_decreto} ${d.fecha_pm}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+function sortRows(rows){
+  const k=state.sortKey,dir=state.sortDir;
+  return [...rows].sort((a,b)=>{
+    let va=a[k],vb=b[k];
+    if(k==='superficie'){va=+va;vb=+vb;}
+    if(va==null||va==='') return 1; if(vb==null||vb==='') return -1;
+    if(typeof va==='number') return (va-vb)*dir;
+    return va.localeCompare(vb,'es')*dir;
+  });
+}
+function render(){
+  if(isSpecialTab(state.tab)) return;
+  const base = currentData();
+  const rows = sortRows(filter());
+  const tb = document.getElementById('tb');
+  if(!rows.length){
+    tb.innerHTML = `<tr><td colspan="10" class="empty">Sin resultados para los filtros actuales.</td></tr>`;
+  } else {
+    tb.innerHTML = rows.map(d=>`
+      <tr data-i="${DATA.indexOf(d)}">
+        <td class="name">${d.nombre}</td>
+        <td><span class="tag tag-${d.tipo}">${d.tipo}</span></td>
+        <td><span class="tag tag-jur-${d.jurisdiccion}">${d.jurisdiccion}</span></td>
+        <td><span class="tag-sub sub-${subCode(d.categoria)}" title="${d.categoria}">${subShort(d.categoria)}</span></td>
+        <td>${d.alcaldia}</td>
+        <td class="date" style="text-align:right">${d.fecha_decreto}</td>
+        <td class="num">${fmt(d.superficie)}</td>
+        <td><span class="status-tag ${d.programa_manejo==='Sí'?'status-tag-si':'status-tag-no'}">${d.programa_manejo}</span></td>
+        <td><span class="status-tag ${d.suelo_conservacion==='Sí'?'status-tag-si':'status-tag-no'}">${d.suelo_conservacion==='Sí'?'Sí':'No'}</span></td>
+        <td class="date" style="text-align:right">${d.fecha_pm||'—'}</td>
+      </tr>`).join('');
+  }
+  document.getElementById('showCount').textContent = fmtInt(rows.length);
+  document.getElementById('totalCount').textContent = fmtInt(base.length);
+  document.getElementById('sumFiltered').textContent = fmt(sum(rows,'superficie'));
+  document.querySelectorAll('thead.t-head th').forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    const a=th.querySelector('.arrow'); if(a) a.textContent='▲';
+    if(th.dataset.k===state.sortKey){
+      th.classList.add(state.sortDir===1?'sort-asc':'sort-desc');
+      if(a) a.textContent = state.sortDir===1?'▲':'▼';
+    }
+  });
+  const thActive = document.querySelector(`thead.t-head th[data-k="${state.sortKey}"]`);
+  document.getElementById('sortInfo').textContent = `Orden · ${thActive?thActive.textContent.replace(/[▲▼]/g,'').trim():''} ${state.sortDir===1?'↑':'↓'}`;
+}
+
+document.querySelectorAll('thead.t-head th').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const k=th.dataset.k;
+    if(state.sortKey===k) state.sortDir*=-1; else { state.sortKey=k; state.sortDir=1; }
+    render();
+  });
+});
+document.getElementById('q').addEventListener('input',e=>{ state.q=e.target.value; render(); });
+document.getElementById('fJur').addEventListener('change',e=>{ state.fJur=e.target.value; render(); });
+document.getElementById('fCat').addEventListener('change',e=>{ state.fCat=e.target.value; render(); });
+document.getElementById('fAlc').addEventListener('change',e=>{ state.fAlc=e.target.value; render(); });
+document.getElementById('fPM').addEventListener('change',e=>{ state.fPM=e.target.value; render(); });
+document.getElementById('btnReset').addEventListener('click',()=>{
+  state.q=''; state.fJur=''; state.fCat=''; state.fAlc=''; state.fPM='';
+  ['q','fJur','fCat','fAlc','fPM'].forEach(id=>document.getElementById(id).value='');
+  render();
+});
+
+function getLegalContext(d){
+  const parts = [];
+  if(d.tipo==='AVA'){
+    parts.push({t:"Definición AVA", ref:"Art. 4° fr. VI LACM", p:"Todos los bosques urbanos, barrancas y cuerpos de agua dentro del territorio y bajo las competencias de la Ciudad de México, en donde los ambientes originales han sido modificados por actividades antropogénicas y que requieren ser restauradas o preservadas, en función de que aún mantienen ciertas características biofísicas y escénicas."});
+    if(d.categoria==='Bosque Urbano'){
+      parts.push({t:"Bosques Urbanos", ref:"Art. 117 LACM", p:"AVA localizadas en suelo urbano con predominio de flora arbórea y arbustiva y vida silvestre asociada; valor ambiental, estético, científico, educativo, recreativo, histórico o turístico."});
+      parts.push({t:"Gobernanza", ref:"Art. 124 LACM", p:"Consejo Rector Ciudadano de 7 a 14 integrantes, designados por la Secretaría por 4 años (ratificables 2 adicionales); órgano de asesoría sobre programas, proyectos, Programa de Manejo y autorizaciones."});
+    }
+    if(d.categoria==='Barranca'){
+      parts.push({t:"Barrancas", ref:"Arts. 4° fr. XI, 120 LACM", p:"Depresiones geográficas que sirven de refugio de vida silvestre, cauce de escurrimientos naturales y precipitaciones pluviales, y constituyen zonas importantes del ciclo hidrológico y biogeoquímico. Su Programa de Manejo regula actividades garantizando restauración y preservación de características biofísicas y escénicas que contribuyen al balance hídrico."});
+      parts.push({t:"Gobernanza", ref:"Art. 125 LACM", p:"Consejo Intersectorial (máx. 7 integrantes del sector gobierno + academia + sector empresarial + sector social) que gestiona y articula diseño y ejecución del Programa de Manejo."});
+    }
+    parts.push({t:"Prohibiciones adicionales", ref:"Art. 123 LACM", p:"Además de las prohibiciones aplicables a ANP (Art. 138), en AVA se prohíbe el aprovechamiento o extracción de recursos naturales."});
+  } else if(d.tipo==='ANP' && d.jurisdiccion==='Local'){
+    parts.push({t:"Definición ANP", ref:"Art. 4° fr. VII LACM", p:"Zonas del territorio sobre las que la Ciudad de México ejerce su soberanía y jurisdicción, en donde los ambientes originales no han sido significativamente alterados por la actividad del ser humano o que requieren ser preservadas y restauradas."});
+    const catArt = {
+      "Zona de Conservación Ecológica":"Art. 128 LACM — Muestras representativas de uno o más ecosistemas en buen estado de preservación; destinada a proteger biodiversidad, elementos naturales y procesos ecológicos, provisión de servicios ambientales y bienestar social.",
+      "Zona de Protección Hidrológica y Ecológica":"Art. 129 LACM — Protección, preservación y restauración de cuencas hidrológicas, acuíferos y sus zonas de recarga, así como fauna, flora, suelo, subsuelo y servicios ambientales asociados.",
+      "Zona Ecológica y Cultural":"Art. 130 LACM — Importantes valores ambientales y ecológicos con elementos físicos, históricos, arqueológicos o sujetos a usos y costumbres de importancia cultural.",
+      "Refugio de Vida Silvestre":"Art. 131 LACM — Hábitat natural de especies de fauna y flora que se encuentran en alguna categoría de protección especial o presentan una distribución restringida.",
+      "Zona de Protección Especial":"Art. 132 LACM — Localizadas en suelo de conservación con escasa vegetación natural, inducida o fuertemente modificada; por extensión o características no caben en otras categorías de ANP.",
+      "Reserva Ecológica Comunitaria":"Art. 133 LACM — Establecidas por pueblos, comunidades y ejidos en terrenos de su propiedad; no se modifica el régimen de propiedad. Pueden constituirse en núcleos agrarios o en propiedad privada.",
+      "Zona Sujeta a Conservación Ecológica":"Art. 134 LACM — Circunvecinas a asentamientos humanos; ecosistemas en buen estado destinados a preservar biodiversidad, elementos naturales indispensables al equilibrio ecológico y servicios ambientales."
+    };
+    if(catArt[d.categoria]){
+      const split = catArt[d.categoria].split(' — ');
+      parts.push({t:d.categoria, ref:split[0], p:split[1]});
+    }
+    parts.push({t:"Gobernanza", ref:"Art. 151 LACM", p:"Consejo Asesor con representantes de la Secretaría, entidades del GCDMX, Alcaldías, academia, sector social, sector empresarial, ejidos y comunidades, propietarios y poseedores. Órgano de consulta y apoyo para formulación, ejecución, seguimiento y evaluación de la política del área."});
+    parts.push({t:"Prohibiciones", ref:"Art. 138 LACM", p:"Quedan prohibidos: asentamientos humanos irregulares o expansión de regulares; actividades que afecten la biodiversidad; actividades riesgosas; emisiones contaminantes; extracción de suelo/subsuelo no científica; afectación al sistema hidrológico; caza y explotación ilícita; introducción de especies exóticas, invasoras y ferales."});
+  } else if(d.tipo==='ANP' && d.jurisdiccion==='Federal'){
+    parts.push({t:"Marco federal", ref:"LGEEPA · Arts. 44-47 BIS", p:"Competencia de la Federación; administración por CONANP. El Gobierno de la Ciudad de México podrá administrarlas en términos del Art. 136 LACM."});
+    if(d.categoria==='Parque Nacional'){
+      parts.push({t:"Parque Nacional", ref:"LGEEPA Art. 50", p:"Representaciones biogeográficas a nivel nacional de uno o más ecosistemas; valor científico, educativo, recreativo o histórico; belleza escénica o flora/fauna de relevancia."});
+    }
+    if(d.categoria==='Área de Protección de Recursos Naturales'){
+      parts.push({t:"APRN", ref:"LGEEPA Art. 53", p:"Preservación y protección del suelo, cuencas hidrográficas, aguas y recursos forestales."});
+    }
+  }
+  return parts;
+}
+
+/* ===== Cartografía · GeoJSON de polígonos ===== */
+/* GEOMETRIES se llena cargando ./geometrias.geojson en runtime.
+   Cada feature debe tener: properties.id_match (slug que coincide con DATA.id) o properties.nombre.
+   El nombre debe ser idéntico al campo "nombre" del inventario para que el matching funcione. */
+let GEOMETRIES = null;
+let GEOM_INDEX = {};
+
+function slugify(s){
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+}
+
+/* GeoJSON embebido directamente en el HTML — funciona con file:// (doble clic), http:// y https:// sin restricciones de CORS */
+// GEOMETRIES_EMBEDDED se carga ahora desde data/geometrias.geojson (lazy)
+let _GEOM_PROMISE = null;
+function loadGeometriesData(){
+  if(!_GEOM_PROMISE){
+    _GEOM_PROMISE = fetch('data/geometrias.geojson')
+      .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .catch(err => {
+        console.error('[Geometrías] Error al cargar:', err);
+        return { type:'FeatureCollection', features:[] };
+      });
+  }
+  return _GEOM_PROMISE;
+}
+
+async function loadGeometries(){
+  if(GEOMETRIES) return GEOMETRIES;
+  try {
+    const [g, a] = await Promise.all([loadGeometriesData(), loadAlcaldiasData()]);
+    GEOMETRIES = g;
+    ALCALDIAS_EMBEDDED = a;
+    if(GEOMETRIES.features) {
+      GEOM_INDEX = {};
+      GEOMETRIES.features.forEach(f => {
+        const p = f.properties||{};
+        if(p.nombre) GEOM_INDEX[slugify(p.nombre)] = f;
+        if(p.id_match) GEOM_INDEX[p.id_match] = f;
+      });
+    }
+  } catch(err) {
+    console.error('[Dashboard] Error cargando geometrías:', err);
+    GEOMETRIES = { type:'FeatureCollection', features:[] };
+  }
+  return GEOMETRIES;
+}
+
+/* GeoJSON de alcaldías embebido — capa de contexto territorial sobre los mapas */
+// ALCALDIAS_EMBEDDED se carga ahora desde data/alcaldias.geojson (lazy)
+let _ALC_PROMISE = null;
+function loadAlcaldiasData(){
+  if(!_ALC_PROMISE){
+    _ALC_PROMISE = fetch('data/alcaldias.geojson')
+      .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .catch(err => {
+        console.error('[Alcaldías] Error al cargar:', err);
+        return { type:'FeatureCollection', features:[] };
+      });
+  }
+  return _ALC_PROMISE;
+}
+let ALCALDIAS_EMBEDDED = { type:'FeatureCollection', features:[] };
+
+/* Colores institucionales por grupo para el mapa global */
+const GROUP_COLORS = {
+  'AVA · Bosque Urbano': '#027a35',
+  'AVA · Barranca':       '#ac6d14',
+  'ANP · Local':          '#9d2148',
+  'ANP · Federal':        '#266cb4'
+};
+
+/* Capa de alcaldías reutilizable */
+function createAlcaldiasLayer(opts={}) {
+  const defaults = {
+    color: '#888', weight: 1, fillOpacity: 0.04, fillColor: '#888',
+    dashArray: '3,4', interactive: false
+  };
+  return L.geoJSON(ALCALDIAS_EMBEDDED, {
+    style: () => ({...defaults, ...opts}),
+    onEachFeature: (feat, layer) => {
+      if(opts.interactive !== false) {
+        layer.bindTooltip(feat.properties.nombre, {sticky: true, direction:'top', className:'alc-tooltip'});
+      }
+    }
+  });
+}
+
+/* ===== Pestaña MAPA GLOBAL ===== */
+let globalMap = null;
+let globalGroupLayers = {};
+let globalAlcaldiasLayer = null;
+
+function destroyGlobalMap(){
+  if(globalMap){ globalMap.remove(); globalMap=null; globalGroupLayers={}; globalAlcaldiasLayer=null; }
+}
+
+function renderMapaPage(g){
+  const isGlobal = !g || g.id === 'ALL';
+  const labels = {
+    'BU':'Bosques Urbanos','BR':'Barrancas',
+    'ANPL':'ANP Locales','ANPF':'ANP Federales'
+  };
+  const groupLabel = isGlobal ? '' : (labels[g.id] || g.label);
+  const total = isGlobal ? DATA.length : DATA.filter(d => d.grupo === g.key).length;
+
+  let eyebrow, title, intro;
+  if(isGlobal){
+    eyebrow = 'Cartografía global · Sistema de áreas protegidas CDMX';
+    title = 'Mapa <em>institucional</em> · 65 polígonos georreferenciados';
+    intro = 'Visualización integral del Sistema de Áreas Naturales Protegidas, Áreas de Valor Ambiental y Áreas Comunitarias de Conservación Ecológica. Filtre por grupo, cambie la capa base y haga clic en cualquier polígono para abrir su ficha técnica completa.';
+  } else {
+    eyebrow = `Cartografía · ${groupLabel}`;
+    title = `Mapa de <em>${groupLabel}</em> · ${total} ${total===1?'área registrada':'áreas registradas'}`;
+    intro = '';
+  }
+
+  return `
+    <div class="panel panel-compact" style="border-left:3px solid var(--guinda)">
+      <div class="panel-title" style="color:var(--guinda)">${eyebrow}</div>
+      <h3>${title}</h3>
+      ${intro ? `<p class="panel-intro" style="margin-bottom:10px">${intro}</p>` : ''}
+
+      ${isGlobal ? '<div class="map-filters" id="mapFilters"></div>' : ''}
+
+      <div class="global-map-block">
+        <div class="map-block-head">
+          <span class="map-block-title">EPSG:4326 · WGS84 · Capa base</span>
+          <div class="map-block-toggle" id="globalLayerToggle">
+            <button data-layer="positron" class="active">Mapa</button>
+            <button data-layer="satelite">Satélite</button>
+          </div>
+        </div>
+        <div class="sc-toggle-row" style="padding:6px 12px;background:#f7f7f5;border-bottom:1px solid var(--line);margin:0">
+          <button class="sc-toggle-btn active" id="globalSCToggle" type="button"><span class="sc-swatch"></span>Suelo de Conservación</button>
+        </div>
+        <div id="globalMapCanvas"></div>
+        <div class="map-block-foot">
+          <span style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:14px;height:2px;background:#888;border-top:1px dashed #888"></span> Límites de alcaldía (referencia)</span>
+          <span style="margin-left:auto">Clic en un polígono para abrir la ficha</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function initGlobalMap(){
+  const canvas = document.getElementById('globalMapCanvas');
+  if(!canvas || typeof L==='undefined') return;
+  destroyGlobalMap();
+  
+  // Asegura que las geometrías estén cargadas
+  if(!GEOMETRIES) loadGeometries();
+  
+  globalMap = L.map(canvas, { zoomControl:true, scrollWheelZoom:false });
+  setGlobalBaseLayer('positron');
+  
+  // Capa de alcaldías como contexto territorial
+  globalAlcaldiasLayer = createAlcaldiasLayer({interactive:true}).addTo(globalMap);
+  
+  // Crea capas SOLO de los grupos cuyo filtro está activo
+  // En Global: los 4 grupos. En categorías: solo el grupo correspondiente.
+  const groups = ['AVA · Bosque Urbano','AVA · Barranca','ANP · Local','ANP · Federal'];
+  const allBounds = L.latLngBounds([]);
+
+  groups.forEach(grupo => {
+    if(!state.mapFilters[grupo]) return;  // saltar grupos inactivos
+
+    const color = GROUP_COLORS[grupo];
+    const features = (GEOMETRIES.features||[]).filter(f=>f.properties.grupo===grupo);
+    const layer = L.geoJSON({type:'FeatureCollection',features}, {
+      style: { color, weight: 1.5, fillColor: color, fillOpacity: 0.22 },
+      onEachFeature: (feat, lyr) => {
+        lyr.bindTooltip(feat.properties.nombre, {sticky:true, direction:'top'});
+        lyr.on('click', () => {
+          const area = DATA.find(d => d.nombre === feat.properties.nombre);
+          if(area) openDrawer(area);
+        });
+        lyr.on('mouseover', () => lyr.setStyle({weight:3, fillOpacity:0.4}));
+        lyr.on('mouseout', () => lyr.setStyle({weight:1.5, fillOpacity:0.22}));
+      }
+    });
+    layer.addTo(globalMap);
+    globalGroupLayers[grupo] = layer;
+    if(features.length) allBounds.extend(layer.getBounds());
+  });
+  
+  if(allBounds.isValid()) globalMap.fitBounds(allBounds, {padding:[20,20]});
+  
+  globalMap.on('click focus', () => globalMap.scrollWheelZoom.enable());
+  globalMap.on('mouseout', () => globalMap.scrollWheelZoom.disable());
+  
+  // Filtros (chips toggle)
+  renderMapFilters();
+  
+  // Toggle de capa base
+  document.querySelectorAll('#globalLayerToggle button').forEach(btn => {
+    btn.addEventListener('click', () => setGlobalBaseLayer(btn.dataset.layer));
+  });
+
+  // Toggle de Suelo de Conservación · ACTIVO POR DEFAULT
+  const scBtn = document.getElementById('globalSCToggle');
+  if(scBtn){
+    // Función auxiliar para añadir la capa
+    const addSCLayer = async () => {
+      const sc = await loadSueloConservacion();
+      if(!sc.features || !sc.features.length){
+        console.warn('Suelo de Conservación no disponible.');
+        scBtn.classList.remove('active');
+        return false;
+      }
+      globalMap._scLayer = L.geoJSON(sc, {
+        style: { color:'#006064', weight:1.5, fillColor:'#00838f', fillOpacity:0.20, dashArray:'4,3' },
+        interactive: false
+      }).addTo(globalMap);
+      globalMap._scLayer.bringToBack();
+      if(globalAlcaldiasLayer) globalAlcaldiasLayer.bringToFront();
+      Object.values(globalGroupLayers).forEach(l => l.bringToFront());
+      scBtn.classList.add('active');
+      return true;
+    };
+
+    // Cargar SC inmediatamente al inicializar (default ON)
+    addSCLayer();
+
+    scBtn.addEventListener('click', async () => {
+      const isActive = scBtn.classList.contains('active');
+      if(isActive){
+        if(globalMap._scLayer){ globalMap.removeLayer(globalMap._scLayer); globalMap._scLayer = null; }
+        scBtn.classList.remove('active');
+      } else {
+        await addSCLayer();
+      }
+    });
+  }
+}
+
+function setGlobalBaseLayer(key){
+  if(!globalMap) return;
+  if(globalMap._activeBase) globalMap.removeLayer(globalMap._activeBase);
+  const cfg = TILE_LAYERS[key] || TILE_LAYERS.positron;
+  globalMap._activeBase = L.tileLayer(cfg.url, {attribution:cfg.attribution, maxZoom:cfg.maxZoom}).addTo(globalMap);
+  // Reordena overlays para que queden encima
+  if(globalAlcaldiasLayer) globalAlcaldiasLayer.bringToFront();
+  Object.values(globalGroupLayers).forEach(l=>l.bringToFront());
+  document.querySelectorAll('#globalLayerToggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.layer===key);
+  });
+}
+
+function renderMapFilters(){
+  const container = document.getElementById('mapFilters');
+  if(!container) return;
+  const groups = [
+    {key:'AVA · Bosque Urbano', label:'Bosques Urbanos'},
+    {key:'AVA · Barranca',       label:'Barrancas'},
+    {key:'ANP · Local',          label:'ANP Locales'},
+    {key:'ANP · Federal',        label:'ANP Federales'}
+  ];
+  container.innerHTML = groups.map(g=>{
+    const count = (GEOMETRIES.features||[]).filter(f=>f.properties.grupo===g.key).length;
+    const color = GROUP_COLORS[g.key];
+    const isActive = state.mapFilters[g.key] !== false;
+    return `<button class="map-filter-chip${isActive?' active':''}" data-grupo="${g.key}" style="--chip-color:${color}">
+      <span class="chip-dot"></span>${g.label} <span class="chip-count">${count}</span>
+    </button>`;
+  }).join('');
+
+  container.querySelectorAll('.map-filter-chip').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      const grupo = btn.dataset.grupo;
+      const layer = globalGroupLayers[grupo];
+      const isActive = btn.classList.contains('active');
+      if(!layer || !globalMap) {
+        btn.classList.toggle('active');
+        return;
+      }
+      if(isActive){
+        globalMap.removeLayer(layer);
+        btn.classList.remove('active');
+        state.mapFilters[grupo] = false;
+      } else {
+        layer.addTo(globalMap);
+        btn.classList.add('active');
+        state.mapFilters[grupo] = true;
+      }
+    });
+  });
+}
+
+function findGeometry(d){
+  if(!GEOM_INDEX) return null;
+  return GEOM_INDEX[slugify(d.nombre)] || GEOM_INDEX[d.id] || null;
+}
+
+const TILE_LAYERS = {
+  positron: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 19
+  },
+  satelite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles © Esri · Maxar · Earthstar Geographics',
+    maxZoom: 18
+  },
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19
+  }
+};
+
+let activeMap = null;
+let activeBaseLayer = null;
+let activeGeoLayer = null;
+
+function destroyMap(){
+  if(activeMap){ activeMap.remove(); activeMap = null; activeBaseLayer = null; activeGeoLayer = null; }
+}
+
+function setBaseLayer(key){
+  if(!activeMap) return;
+  if(activeBaseLayer){ activeMap.removeLayer(activeBaseLayer); }
+  const cfg = TILE_LAYERS[key] || TILE_LAYERS.positron;
+  activeBaseLayer = L.tileLayer(cfg.url, {attribution: cfg.attribution, maxZoom: cfg.maxZoom}).addTo(activeMap);
+  // Reordena geo layer encima
+  if(activeGeoLayer){ activeGeoLayer.bringToFront(); }
+  document.querySelectorAll('.map-block-toggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.layer===key);
+  });
+}
+
+function initMapForArea(d){
+  const container = document.getElementById('mapCanvas');
+  if(!container || typeof L === 'undefined') return;
+  const geo = findGeometry(d);
+  if(!geo){
+    container.classList.add('no-data');
+    container.innerHTML = '<div><b>Polígono no disponible aún</b>Cuando se integre el archivo cartográfico se mostrará el polígono georreferenciado en este espacio.</div>';
+    return;
+  }
+  container.classList.remove('no-data');
+  container.innerHTML = '';
+  activeMap = L.map(container, { zoomControl: true, scrollWheelZoom: false, attributionControl: true });
+  setBaseLayer('positron');
+  // Capa de alcaldías como contexto territorial (dibujada antes del polígono para que quede debajo)
+  createAlcaldiasLayer({interactive:true}).addTo(activeMap);
+  activeGeoLayer = L.geoJSON(geo, {
+    style: {
+      color: '#9d2148',
+      weight: 2,
+      fillColor: '#9d2148',
+      fillOpacity: 0.18
+    }
+  }).addTo(activeMap);
+  activeGeoLayer.bindTooltip(d.nombre, {sticky: true, direction: 'top'});
+  activeGeoLayer.bringToFront();
+  activeMap.fitBounds(activeGeoLayer.getBounds(), {padding: [20,20], maxZoom: 16});
+  // Habilita scroll-wheel solo después de clic en el mapa (mejor UX)
+  activeMap.on('click focus', ()=>activeMap.scrollWheelZoom.enable());
+  activeMap.on('mouseout', ()=>activeMap.scrollWheelZoom.disable());
+
+  // Toggle Suelo de Conservación en mapa específico · ACTIVO POR DEFAULT
+  const drawerScBtn = document.getElementById('drawerSCToggle');
+  if(drawerScBtn){
+    const addDrawerSCLayer = async () => {
+      const sc = await loadSueloConservacion();
+      if(!sc.features || !sc.features.length){
+        drawerScBtn.classList.remove('active');
+        return false;
+      }
+      activeMap._scLayer = L.geoJSON(sc, {
+        style: { color:'#006064', weight:1.5, fillColor:'#00838f', fillOpacity:0.20, dashArray:'4,3' },
+        interactive: false
+      }).addTo(activeMap);
+      activeMap._scLayer.bringToBack();
+      if(activeGeoLayer) activeGeoLayer.bringToFront();
+      drawerScBtn.classList.add('active');
+      return true;
+    };
+
+    // Cargar SC inmediatamente al abrir cualquier ficha
+    addDrawerSCLayer();
+
+    drawerScBtn.onclick = async () => {
+      const isActive = drawerScBtn.classList.contains('active');
+      if(isActive){
+        if(activeMap._scLayer){ activeMap.removeLayer(activeMap._scLayer); activeMap._scLayer = null; }
+        drawerScBtn.classList.remove('active');
+      } else {
+        await addDrawerSCLayer();
+      }
+    };
+  }
+}
+
+const bd=document.getElementById('bd'),dr=document.getElementById('dr'),drIn=document.getElementById('drIn');
+function openDrawer(d){
+  const legalParts = getLegalContext(d);
+  destroyMap();
+  drIn.innerHTML = `
+    <div class="kat">${d.tipo} · ${d.jurisdiccion}</div>
+    <h2>${d.nombre}</h2>
+    <div class="subcat">${d.categoria}</div>
+
+    <div class="map-block">
+      <div class="map-block-head">
+        <span class="map-block-title">Polígono georreferenciado</span>
+        <div class="map-block-toggle">
+          <button data-layer="positron" class="active">Mapa</button>
+          <button data-layer="satelite">Satélite</button>
+        </div>
+      </div>
+      <div class="sc-toggle-row" style="padding:6px 10px;background:#f7f7f5;border-bottom:1px solid var(--line);margin:0">
+        <button class="sc-toggle-btn active" id="drawerSCToggle" type="button"><span class="sc-swatch"></span>Suelo de Conservación</button>
+      </div>
+      <div class="map-canvas" id="mapCanvas"></div>
+      <div class="map-block-foot">
+        <span>EPSG:4326 · WGS84</span>
+        <span style="margin-left:auto">Clic en el mapa para activar zoom</span>
+      </div>
+    </div>
+
+    <div class="big-num">${fmt(d.superficie)}<span style="font-size:18px;color:var(--muted);margin-left:6px;font-weight:500">ha</span></div>
+    <div class="big-num-lbl">Superficie decretada</div>
+    <div class="field"><div class="k">Tipo</div><div class="v"><span class="tag tag-${d.tipo}">${d.tipo}</span> ${d.tipo==='AVA'?'Área de Valor Ambiental':'Área Natural Protegida'}</div></div>
+    <div class="field"><div class="k">Jurisdicción</div><div class="v"><span class="tag tag-jur-${d.jurisdiccion}">${d.jurisdiccion}</span></div></div>
+    <div class="field"><div class="k">Subcategoría</div><div class="v"><span class="tag-sub sub-${subCode(d.categoria)}">${subShort(d.categoria)}</span> <span style="color:var(--muted);font-size:12.5px;margin-left:4px">${d.categoria}</span></div></div>
+    <div class="field"><div class="k">Alcaldía(s)</div><div class="v">${d.alcaldia}</div></div>
+    <div class="field"><div class="k">Suelo de Conservación</div><div class="v">${(() => {
+      const v = (d.suelo_conservacion === 'Sí') ? 'Sí' : 'No';
+      const cls = v === 'Sí' ? 'status-tag-si' : 'status-tag-no';
+      const note = v === 'Sí' ? 'El polígono se encuentra dentro del Suelo de Conservación' : 'Fuera del Suelo de Conservación';
+      return `<span class="status-tag ${cls}">${v}</span> <span style="color:var(--muted);font-size:12.5px;margin-left:4px">${note}</span>`;
+    })()}</div></div>
+    <div class="field"><div class="k">Fecha decreto</div><div class="v">${d.fecha_decreto}</div></div>
+    <div class="field"><div class="k">Programa de manejo</div><div class="v"><span class="status-tag ${d.programa_manejo==='Sí'?'status-tag-si':'status-tag-no'}">${d.programa_manejo}</span></div></div>
+    <div class="field"><div class="k">Fecha Programa de Manejo</div><div class="v">${d.fecha_pm||'—'}</div></div>
+    ${legalParts.length ? `
+    <div class="legal-block">
+      <div class="title">⚖ Fundamento jurídico aplicable</div>
+      ${legalParts.map(p=>`<p><b>${p.t}</b> <span class="ref">(${p.ref})</span> — ${p.p}</p>`).join('')}
+    </div>` : ''}
+  `;
+  bd.classList.add('open'); dr.classList.add('open');
+  // Carga e inicializa el mapa después de renderizar el contenido
+  loadGeometries().then(()=>{
+    initMapForArea(d);
+    // Listeners de los toggles de capa base
+    document.querySelectorAll('.map-block-toggle button').forEach(btn=>{
+      btn.addEventListener('click', ()=>setBaseLayer(btn.dataset.layer));
+    });
+  });
+}
+function closeDrawer(){ bd.classList.remove('open'); dr.classList.remove('open'); destroyMap(); }
+document.getElementById('tb').addEventListener('click',e=>{
+  const tr=e.target.closest('tr[data-i]'); if(!tr) return;
+  openDrawer(DATA[+tr.dataset.i]);
+});
+document.getElementById('drClose').addEventListener('click',closeDrawer);
+bd.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
+
+document.getElementById('btnExport').addEventListener('click',()=>{
+  const rows=sortRows(filter());
+  const header=['Nombre','Tipo','Jurisdicción','Subcategoría','Alcaldía','Fecha decreto','Superficie (ha)','Programa manejo','En Suelo de Conservación','Fecha PM'];
+  const esc=s=>`"${String(s).replace(/"/g,'""')}"`;
+  const csv=[header.join(',')].concat(rows.map(d=>[d.nombre,d.tipo,d.jurisdiccion,d.categoria,d.alcaldia,d.fecha_decreto,d.superficie,d.programa_manejo,d.suelo_conservacion||'No',d.fecha_pm||''].map(esc).join(','))).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`proteccion_ambiental_cdmx_${state.tab.toLowerCase()}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('metaCount').textContent = fmtInt(DATA.length);
+
+/* =====================================================================
+   ASISTENTE · Motor de consultas semánticas en lenguaje natural
+   ===================================================================== */
+const Chat = (function(){
+  // Normaliza texto: quita acentos, minúsculas, trim
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+
+  // Catálogo de alcaldías con variantes cortas para detección flexible
+  const ALCALDIAS_MAP = [
+    {nombre:'Álvaro Obregón', alias:['alvaro obregon','alvaro','obregon']},
+    {nombre:'Coyoacán', alias:['coyoacan']},
+    {nombre:'Cuajimalpa de Morelos', alias:['cuajimalpa','cuajimalpa de morelos']},
+    {nombre:'Cuauhtémoc', alias:['cuauhtemoc']},
+    {nombre:'Gustavo A. Madero', alias:['gustavo a. madero','gustavo madero','gam','gustavo a madero']},
+    {nombre:'Iztacalco', alias:['iztacalco']},
+    {nombre:'Iztapalapa', alias:['iztapalapa']},
+    {nombre:'La Magdalena Contreras', alias:['magdalena contreras','la magdalena contreras','contreras','magdalena']},
+    {nombre:'Miguel Hidalgo', alias:['miguel hidalgo']},
+    {nombre:'Milpa Alta', alias:['milpa alta','milpa']},
+    {nombre:'Tláhuac', alias:['tlahuac']},
+    {nombre:'Tlalpan', alias:['tlalpan']},
+    {nombre:'Venustiano Carranza', alias:['venustiano carranza','venustiano','carranza']},
+    {nombre:'Xochimilco', alias:['xochimilco','xochi']}
+  ];
+
+  // Palabras genéricas que NO deben considerarse identificadores únicos de área
+  const GENERIC_WORDS = new Set(['bosque','barranca','sierra','cerro','area','parque','lineal','urbano','urbana','federal','local','nacional','ecologica','ecologico','reserva','zona','del','dela','las','los','san','santa','con','sin','para','por','que','los','area','arcas','seccion','secciones']);
+
+  // Construye un índice de tokens únicos → área (para reconocer nombres específicos)
+  function buildNameIndex(){
+    const tokenMap = {};
+    DATA.forEach(d => {
+      const tokens = norm(d.nombre).split(/[\s\(\),\-\\]+/).filter(w => w.length > 3 && !GENERIC_WORDS.has(w));
+      tokens.forEach(t => {
+        if(!tokenMap[t]) tokenMap[t] = new Set();
+        tokenMap[t].add(d.nombre);
+      });
+    });
+    // Solo conservar tokens que identifican unívocamente un área
+    const unique = {};
+    Object.entries(tokenMap).forEach(([t, set]) => {
+      if(set.size === 1) unique[t] = [...set][0];
+    });
+    return unique;
+  }
+  const NAME_INDEX = buildNameIndex();
+
+  // Strip preámbulos conversacionales para búsquedas por nombre
+  function stripPreamble(q){
+    return q
+      .replace(/^[¿?]+\s*/, '')
+      .replace(/[¿?¡!]+$/, '')
+      .replace(/^(hablame|cuentame|dime|muestrame|dame|ensename|describeme)\s+(de|sobre|del|acerca de|que sabes de|que tienes de)\s+/i, '')
+      .replace(/^(que (?:sabes|tienes|hay) (?:de|sobre|del|acerca de))\s+/i, '')
+      .replace(/^(info(?:rmacion)?|datos|ficha|detalles?)\s+(de|sobre|del|acerca de)\s+/i, '')
+      .replace(/^(busca|buscame|encuentra|encuentrame)\s+(a|el|la|los|las)?\s*/i, '')
+      .replace(/^(quiero (?:saber|conocer)\s+(?:de|sobre|acerca de))\s+/i, '')
+      .trim();
+  }
+
+  // Detecta filtros embebidos en la consulta (grupos, alcaldías, años, PM)
+  function detectFilters(q){
+    const qn = norm(q);
+    const f = {};
+
+    // Grupos (puede haber varios — ej. "ANP" significa Local + Federal)
+    const grupos = new Set();
+    if(/\bbarranca\b|\bbarrancas\b/.test(qn)) grupos.add('AVA · Barranca');
+    if(/bosque urbano|bosques urbanos/.test(qn)) grupos.add('AVA · Bosque Urbano');
+    if(/anp[s]? federal(es)?|federal(es)? anp|anp[s]? de jurisdiccion federal/.test(qn)) grupos.add('ANP · Federal');
+    if(/anp[s]? local(es)?|local(es)? anp|anp[s]? de jurisdiccion local/.test(qn)) grupos.add('ANP · Local');
+
+    // ANP sin específico → ambos ANP
+    if(grupos.size === 0 && /\banp[s]?\b|\bareas? naturales? protegidas?\b/.test(qn)){
+      grupos.add('ANP · Federal'); grupos.add('ANP · Local');
+    }
+    // AVA sin específico → ambos AVA
+    if(grupos.size === 0 && /\bava[s]?\b|\bareas? de valor ambiental\b/.test(qn)){
+      grupos.add('AVA · Bosque Urbano'); grupos.add('AVA · Barranca');
+    }
+
+    if(grupos.size > 0) f.grupos = [...grupos];
+
+    // Alcaldía (busca aliases)
+    for(const a of ALCALDIAS_MAP){
+      for(const alias of a.alias){
+        // Word boundary check para evitar falsos positivos
+        const re = new RegExp(`\\b${alias.replace(/\./g,'\\.')}\\b`);
+        if(re.test(qn)){ f.alcaldia = a.nombre; break; }
+      }
+      if(f.alcaldia) break;
+    }
+
+    // Año o década
+    const yearMatch = qn.match(/\b(19\d{2}|20\d{2})\b/);
+    if(yearMatch) f.year = yearMatch[0];
+    const decMatch = qn.match(/\b(19|20)(\d{1})0s\b/) || qn.match(/decada de los?\s+(\d{2,4})/);
+    if(decMatch && !yearMatch){
+      const decStr = decMatch[1] + (decMatch[2] !== undefined ? decMatch[2] : '') + '0';
+      f.decade = parseInt(decStr.length === 4 ? decStr : '20'+decStr);
+    }
+    const beforeMatch = qn.match(/antes de (?:l |la |el )?(\d{4})/);
+    if(beforeMatch) f.beforeYear = parseInt(beforeMatch[1]);
+    const afterMatch = qn.match(/(?:despues de|posterior a|despues del) (\d{4})/);
+    if(afterMatch) f.afterYear = parseInt(afterMatch[1]);
+
+    // PM
+    if(/sin (programa de manejo|pm)|no (?:tienen|tiene|cuentan con|cuenta con) (?:programa de manejo|pm)|carecen de (?:programa de manejo|pm)/.test(qn)) f.pm = 'No';
+    else if(/con (programa de manejo|pm)|(?:tienen|tiene|cuentan con|cuenta con) (?:programa de manejo|pm)|programa de manejo publicado/.test(qn)) f.pm = 'Sí';
+
+    return f;
+  }
+
+  // Detecta nombre específico de área en la consulta usando el índice de tokens únicos
+  function detectAreaName(q){
+    const qn = norm(stripPreamble(q));
+    let bestMatch = null, bestLen = 0;
+    for(const [token, areaName] of Object.entries(NAME_INDEX)){
+      if(qn.includes(token) && token.length > bestLen){
+        bestMatch = areaName; bestLen = token.length;
+      }
+    }
+    if(bestMatch) return DATA.find(d => d.nombre === bestMatch);
+    return null;
+  }
+
+  // Detecta intención principal
+  function detectIntent(q){
+    const qn = norm(q);
+    if(/^(ayuda|help|que puedes (?:hacer|responder)|que sabes|opciones|menu|comandos)$/.test(qn)) return 'help';
+    if(/^(hola|hi|hello|buenos dias|buenas tardes|buenas noches|hey|saludos|que tal|que onda)/.test(qn)) return 'greeting';
+    if(/^(gracias|muchas gracias|thanks|mil gracias|te lo agradezco)/.test(qn)) return 'thanks';
+
+    // Plurales de superlativos → top N
+    if(/(las|los)\s+(?:\d+\s+|areas?\s+|anp[s]?\s+|ava[s]?\s+|barrancas?\s+|bosques?\s+)?(?:mas|más)\s+(grandes|extens|amplias|enormes)|top\s+\d+|primeras?\s+\d+|ranking|las\s+(?:mas|más)\s+extens/.test(qn)) return 'topBiggest';
+    if(/(las|los)\s+(?:\d+\s+|areas?\s+|anp[s]?\s+|ava[s]?\s+|barrancas?\s+|bosques?\s+)?(?:mas|más)\s+(antigu|viej)|primeras?\s+decretadas?/.test(qn)) return 'topOldest';
+    if(/(las|los)\s+(?:\d+\s+|areas?\s+|anp[s]?\s+|ava[s]?\s+|barrancas?\s+|bosques?\s+)?(?:mas|más)\s+(reciente|nuev)|ultimas?\s+decretadas?|ultimas?\s+\d+/.test(qn)) return 'topNewest';
+
+    // Singulares
+    if(/mas grande|mayor superficie|maxima superficie|la mayor|el mayor|mas extens[oa]|mas amplia/.test(qn)) return 'biggest';
+    if(/mas pequen[ao]|menor superficie|minima superficie|la menor|el menor|mas chic[ao]|mas pequen/.test(qn)) return 'smallest';
+    if(/mas antigu[oa]|mas viej[oa]|primer decreto|primera decretada|primer area|el primero|la primera/.test(qn)) return 'oldest';
+    if(/mas reciente|mas nuev[ao]|ultim[oa] decret|recien decretad|ultima area/.test(qn)) return 'newest';
+
+    if(/superficie total|cuant(a|o) superficie|cuantas hectareas|hectareas totales|total de hectareas|en total cuanta|km2 totales|cuantos km/.test(qn)) return 'totalSurface';
+    if(/promedio|en promedio|media|hectareas promedio|superficie promedio/.test(qn)) return 'average';
+
+    if(/cuantas? (areas?|anp|ava|barranc|bosques?)|^cuantas?\s+|numero (de|total)|total (de|son)|^cuantos\s+/.test(qn)) return 'count';
+
+    if(/cuales|cuales son|listame|lista|enumera|muestrame|que areas?|dame|dime cuales|listado|que (?:hay|existen)/.test(qn)) return 'list';
+
+    if(/donde esta|en que alcaldia|alcaldia|ubicacion/.test(qn)) return 'where';
+
+    return 'list';
+  }
+
+  // Detección de intenciones jurídicas
+  function detectLegalIntent(q){
+    const qn = norm(q);
+    if(/(que es|definicion|significa|que significa).*?\b(anp|area natural protegida|areas naturales protegidas)\b/.test(qn) || /^(anp|area natural protegida)\??$/.test(qn)) return 'def_anp';
+    if(/(que es|definicion|significa).*?\b(ava|area de valor ambiental|areas? de valor ambiental)\b/.test(qn) || /^(ava|area de valor ambiental)\??$/.test(qn)) return 'def_ava';
+    if(/(que es|definicion|significa).*?\b(arcas|area comunitaria|areas? comunitarias?)\b/.test(qn) || /^(arcas)\??$/.test(qn)) return 'def_arcas';
+    if(/(que es|definicion|significa|para que sirve|en que consiste).*?\b(pm|programa de manejo)\b/.test(qn) || /^(programa de manejo|pm)\??$/.test(qn)) return 'def_pm';
+    if(/(que es|que dice|cuando se publico|definicion|significa).*?(lacm|ley ambiental(?: de la cdmx| de la ciudad)?)/.test(qn) || /^(lacm|ley ambiental)\??$/.test(qn)) return 'def_lacm';
+    if(/(que es|que dice).*?(lgeepa|ley general del equilibrio)/.test(qn) || /^(lgeepa)\??$/.test(qn)) return 'def_lgeepa';
+    if(/(que es|que dice).*?(cpcdmx|constitucion(?: politica)? de la (?:cdmx|ciudad))/.test(qn) || /^(cpcdmx)\??$/.test(qn)) return 'def_cpcdmx';
+    if(/categori[ao]s? (?:de )?anp federal|tipos? de anp federal|que tipos? de anp federal/.test(qn)) return 'cat_federal';
+    if(/categori[ao]s? (?:de )?anp local|tipos? de anp local|que tipos? de anp local/.test(qn)) return 'cat_local';
+    if(/marco juridico|marco legal|que leyes|que normatividad|fundamento legal|base legal|cual es el marco/.test(qn)) return 'marco';
+    if(/fundamento|que articulo|donde se regula|donde esta regulado|donde esta normado/.test(qn)) return 'marco';
+    if(/articulo (\d+)|art\.?\s+(\d+)/.test(qn)) return 'articulo';
+    if(/zona ecologica y cultural|zec\b/.test(qn)) return 'def_zec';
+    if(/zona sujeta a conservacion ecologica|zsce\b/.test(qn)) return 'def_zsce';
+    if(/zona de proteccion especial|zpe\b/.test(qn)) return 'def_zpe';
+    if(/reserva ecologica comunitaria|rec\b/.test(qn)) return 'def_rec';
+    if(/parque nacional/.test(qn)) return 'def_pn';
+    if(/sedema|secretaria del medio ambiente/.test(qn)) return 'def_sedema';
+    if(/conanp|comision nacional de areas/.test(qn)) return 'def_conanp';
+    if(/jurisdiccion|competencia|quien administra|quien regula|autoridad/.test(qn)) return 'jurisdiccion';
+    return null;
+  }
+
+  function reply(html){ return {role:'assistant', html}; }
+
+  function fmtAreaCard(d){
+    return `<ul class="data-list" style="margin-top:10px">
+      <li><span>Nombre</span><span class="v">${d.nombre}</span></li>
+      <li><span>Grupo</span><span class="v">${d.grupo}</span></li>
+      <li><span>Categoría</span><span class="v" style="white-space:normal;text-align:right">${d.categoria}</span></li>
+      <li><span>Alcaldía</span><span class="v" style="white-space:normal;text-align:right">${d.alcaldia}</span></li>
+      <li><span>Superficie</span><span class="v">${fmt(d.superficie)} ha</span></li>
+      <li><span>Decreto</span><span class="v">${d.fecha_decreto}</span></li>
+      <li><span>Programa de Manejo</span><span class="v">${d.programa_manejo}${d.fecha_pm_iso?' · '+d.fecha_pm:''}</span></li>
+    </ul>`;
+  }
+
+  function applyFilters(arr, f){
+    let r = arr.slice();
+    if(f.grupos) r = r.filter(d => f.grupos.includes(d.grupo));
+    if(f.alcaldia) r = r.filter(d => norm(d.alcaldia).includes(norm(f.alcaldia)));
+    if(f.year) r = r.filter(d => d.fecha_decreto_iso.startsWith(f.year));
+    if(f.decade !== undefined){
+      r = r.filter(d => {
+        const y = parseInt(d.fecha_decreto_iso.slice(0,4));
+        return y >= f.decade && y < f.decade + 10;
+      });
+    }
+    if(f.beforeYear) r = r.filter(d => parseInt(d.fecha_decreto_iso.slice(0,4)) < f.beforeYear);
+    if(f.afterYear) r = r.filter(d => parseInt(d.fecha_decreto_iso.slice(0,4)) > f.afterYear);
+    if(f.pm) r = r.filter(d => d.programa_manejo === f.pm);
+    return r;
+  }
+
+  function ctxString(f){
+    const parts = [];
+    if(f.grupos){
+      const labels = {
+        'AVA · Bosque Urbano':'Bosques Urbanos','AVA · Barranca':'Barrancas',
+        'ANP · Federal':'ANP Federales','ANP · Local':'ANP Locales'
+      };
+      const names = f.grupos.map(g=>labels[g]||g);
+      parts.push(names.length>1 ? `del grupo <b>${names.join(' y ')}</b>` : `del grupo <b>${names[0]}</b>`);
+    }
+    if(f.alcaldia) parts.push(`en <b>${f.alcaldia}</b>`);
+    if(f.year) parts.push(`del año <b>${f.year}</b>`);
+    if(f.decade !== undefined) parts.push(`de los <b>${f.decade}s</b>`);
+    if(f.beforeYear) parts.push(`anteriores a <b>${f.beforeYear}</b>`);
+    if(f.afterYear) parts.push(`posteriores a <b>${f.afterYear}</b>`);
+    if(f.pm === 'Sí') parts.push(`con <b>Programa de Manejo</b>`);
+    if(f.pm === 'No') parts.push(`sin <b>Programa de Manejo</b>`);
+    return parts.length ? ' ' + parts.join(' ') : '';
+  }
+
+  // Extrae el número N de consultas tipo "las 5 más grandes"
+  function detectN(q, def=5){
+    const m = norm(q).match(/(?:las|los|top|primeras?|ultimas?)\s+(\d+)/);
+    if(m){ const n = parseInt(m[1]); return n > 0 && n <= 30 ? n : def; }
+    return def;
+  }
+
+  // ---- Handlers jurídicos ----
+  function handleLegal(intent, q){
+    switch(intent){
+      case 'def_anp':
+        return reply(`<b>ANP · Área Natural Protegida</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Definición</span><span class="v" style="white-space:normal;text-align:right;font-family:'Roboto',sans-serif;color:var(--ink);font-weight:400">Zona del territorio destinada a la conservación de la biodiversidad y los servicios ambientales</span></li>
+            <li><span>Fundamento</span><span class="v">Art. 4° fr. VII LACM</span></li>
+            <li><span>Jurisdicción</span><span class="v">Federal o local</span></li>
+            <li><span>Administración federal</span><span class="v">CONANP</span></li>
+            <li><span>Administración local</span><span class="v">SEDEMA CDMX</span></li>
+          </ul>
+          En el sistema de la CDMX hay <b>${DATA.filter(d=>d.tipo==='ANP').length} ANP</b> registradas (${DATA.filter(d=>d.grupo==='ANP · Local').length} locales y ${DATA.filter(d=>d.grupo==='ANP · Federal').length} federales).`);
+
+      case 'def_ava':
+        return reply(`<b>AVA · Área de Valor Ambiental</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Definición</span><span class="v" style="white-space:normal;text-align:right;font-family:'Roboto',sans-serif;color:var(--ink);font-weight:400">Zonas urbanas en las que los ambientes originales han sido modificados, requieren conservación o restauración para el equilibrio ecológico</span></li>
+            <li><span>Fundamento</span><span class="v">Art. 4° fr. VI LACM</span></li>
+            <li><span>Subcategorías</span><span class="v">Bosque Urbano · Barranca</span></li>
+            <li><span>Administración</span><span class="v">SEDEMA CDMX</span></li>
+          </ul>
+          En la CDMX hay <b>${DATA.filter(d=>d.tipo==='AVA').length} AVA</b> registradas (${DATA.filter(d=>d.grupo==='AVA · Bosque Urbano').length} bosques urbanos y ${DATA.filter(d=>d.grupo==='AVA · Barranca').length} barrancas).`);
+
+      case 'def_arcas':
+        return reply(`<b>ARCAS · Área Comunitaria de Conservación Ecológica</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Definición</span><span class="v" style="white-space:normal;text-align:right;font-family:'Roboto',sans-serif;color:var(--ink);font-weight:400">Áreas establecidas en suelo de conservación de la CDMX, en territorios bajo régimen comunal o ejidal, dedicadas voluntariamente por sus titulares a la conservación</span></li>
+            <li><span>Fundamento</span><span class="v">Art. 152 LACM</span></li>
+            <li><span>Carácter</span><span class="v">Voluntario · comunitario</span></li>
+          </ul>`);
+
+      case 'def_pm':
+        return reply(`<b>PM · Programa de Manejo</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Definición</span><span class="v" style="white-space:normal;text-align:right;font-family:'Roboto',sans-serif;color:var(--ink);font-weight:400">Instrumento rector de planeación y regulación que establece usos de suelo, actividades, acciones y lineamientos para el manejo y administración de AVA y ANP</span></li>
+            <li><span>Fundamento</span><span class="v">Art. 4° fr. LIII LACM</span></li>
+            <li><span>Áreas con PM publicado</span><span class="v">${DATA.filter(d=>d.programa_manejo==='Sí').length} de ${DATA.length}</span></li>
+            <li><span>Áreas sin PM</span><span class="v" style="color:var(--rojo)">${DATA.filter(d=>d.programa_manejo!=='Sí').length}</span></li>
+          </ul>`);
+
+      case 'def_lacm':
+        return reply(`<b>LACM · Ley Ambiental de la Ciudad de México</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Última publicación</span><span class="v">18 jul 2024</span></li>
+            <li><span>Origen</span><span class="v">Gaceta Oficial de la CDMX</span></li>
+            <li><span>Objeto</span><span class="v" style="white-space:normal;text-align:right;font-family:'Roboto',sans-serif;color:var(--ink);font-weight:400">Definir las bases de la política ambiental local; regular la conservación, protección y aprovechamiento sustentable</span></li>
+          </ul>
+          Es el instrumento normativo central que define AVA, ANP, ARCAS, Programa de Manejo y demás figuras del sistema de protección ambiental de la CDMX.`);
+
+      case 'def_lgeepa':
+        return reply(`<b>LGEEPA · Ley General del Equilibrio Ecológico y la Protección al Ambiente</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Ámbito</span><span class="v">Federal</span></li>
+            <li><span>Categorías ANP federales</span><span class="v">Art. 46 LGEEPA</span></li>
+            <li><span>Aplicable a</span><span class="v" style="white-space:normal;text-align:right;font-family:'Roboto',sans-serif;color:var(--ink);font-weight:400">ANP federales en la CDMX (Cumbres del Ajusco, Desierto de los Leones, El Tepeyac, Insurgente Miguel Hidalgo, etc.)</span></li>
+          </ul>`);
+
+      case 'def_cpcdmx':
+        return reply(`<b>CPCDMX · Constitución Política de la Ciudad de México</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Disposición clave</span><span class="v">Art. 16, Apartado A</span></li>
+            <li><span>Mandato</span><span class="v" style="white-space:normal;text-align:right;font-family:'Roboto',sans-serif;color:var(--ink);font-weight:400">Establecimiento de un sistema de Áreas Naturales Protegidas y Áreas de Valor Ambiental para la conservación y restauración del medio ambiente</span></li>
+          </ul>
+          Es la base constitucional local del sistema de protección ambiental.`);
+
+      case 'cat_federal':
+        return reply(`<b>Categorías de ANP federales</b> · Art. 46 LGEEPA
+          <ul class="data-list" style="margin-top:10px">
+            <li>I. Reservas de la Biosfera</li>
+            <li>III. Parques Nacionales</li>
+            <li>IV. Monumentos Naturales</li>
+            <li>VI. Áreas de Protección de Recursos Naturales</li>
+            <li>VII. Áreas de Protección de Flora y Fauna</li>
+            <li>VIII. Santuarios</li>
+            <li>XI. Áreas destinadas voluntariamente a la conservación</li>
+          </ul>
+          En la CDMX, las ANP federales corresponden principalmente a la categoría de <b>Parque Nacional</b> (Cumbres del Ajusco, Desierto de los Leones, El Tepeyac, Insurgente Miguel Hidalgo, etc.).`);
+
+      case 'cat_local':
+        return reply(`<b>Categorías de ANP locales</b> · LACM
+          <ul class="data-list" style="margin-top:10px">
+            <li>Reserva Ecológica</li>
+            <li>Reserva Ecológica Comunitaria (REC)</li>
+            <li>Zona Sujeta a Conservación Ecológica (ZSCE)</li>
+            <li>Zona Ecológica y Cultural (ZEC)</li>
+            <li>Zona de Conservación Ecológica</li>
+            <li>Zona de Protección Hidrológica y Ecológica</li>
+            <li>Zona de Protección Especial (ZPE)</li>
+            <li>Área de Protección de Recursos Naturales</li>
+          </ul>
+          La administración corresponde a la <b>SEDEMA CDMX</b>.`);
+
+      case 'def_zec':
+        return reply(`<b>ZEC · Zona Ecológica y Cultural</b>
+          Categoría de ANP local establecida en la LACM. Áreas con valores ecológicos y culturales relevantes que requieren protección y manejo integrado. Ejemplos en el sistema: <b>Bosque de Tlalpan</b>, <b>Cerro de la Estrella</b>.`);
+
+      case 'def_zsce':
+        return reply(`<b>ZSCE · Zona Sujeta a Conservación Ecológica</b>
+          Categoría de ANP local. Áreas representativas de uno o más ecosistemas que se mantienen relativamente conservados o son susceptibles de restauración. Ejemplos: <b>Bosques de las Lomas</b>, <b>Sierra de Guadalupe</b>, <b>Sierra de Santa Catarina</b>, <b>Ejidos de Xochimilco y San Gregorio Atlapulco</b>.`);
+
+      case 'def_zpe':
+        return reply(`<b>ZPE · Zona de Protección Especial</b>
+          Categoría de ANP local destinada a la protección de elementos naturales específicos o ecosistemas particulares. Ejemplo: <b>Tempiluli</b>, <b>Bosque de Tláhuac</b>.`);
+
+      case 'def_rec':
+        return reply(`<b>REC · Reserva Ecológica Comunitaria</b>
+          Categoría de ANP local en territorios comunales o ejidales, donde la conservación se ejerce con participación de las comunidades originarias. Ejemplos: <b>San Miguel Topilejo</b> (la más grande del sistema), <b>San Nicolás Totolapan</b>, <b>San Miguel Ajusco</b>, <b>San Bernabé Ocotepec</b>.`);
+
+      case 'def_pn':
+        return reply(`<b>Parque Nacional</b>
+          Categoría de ANP federal establecida en el Art. 46 fr. III de la LGEEPA. Áreas con uno o más ecosistemas que se distinguen por su belleza escénica, valor científico, educativo o histórico. En la CDMX: <b>Cumbres del Ajusco</b>, <b>Desierto de los Leones</b>, <b>El Tepeyac</b>, <b>Fuentes Brotantes de Tlalpan</b>, <b>Insurgente Miguel Hidalgo y Costilla</b>, <b>Lomas de Padierna</b>.`);
+
+      case 'def_sedema':
+        return reply(`<b>SEDEMA · Secretaría del Medio Ambiente de la Ciudad de México</b>
+          Dependencia del Gobierno de la CDMX responsable de la política ambiental local. Administra las ANP locales, las AVA (Bosques Urbanos y Barrancas) y emite los Programas de Manejo correspondientes. Es la autoridad rectora del Sistema de Información Ambiental (SIA).`);
+
+      case 'def_conanp':
+        return reply(`<b>CONANP · Comisión Nacional de Áreas Naturales Protegidas</b>
+          Órgano desconcentrado de la Secretaría de Medio Ambiente y Recursos Naturales (SEMARNAT). Administra las ANP de jurisdicción federal en todo el país, incluyendo las que se ubican en la CDMX (Desierto de los Leones, Cumbres del Ajusco, El Tepeyac, etc.).`);
+
+      case 'jurisdiccion':
+        return reply(`<b>Jurisdicción y competencia en áreas protegidas</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>ANP federales</span><span class="v">CONANP / SEMARNAT</span></li>
+            <li><span>ANP locales</span><span class="v">SEDEMA CDMX</span></li>
+            <li><span>AVA (Bosques Urbanos · Barrancas)</span><span class="v">SEDEMA CDMX</span></li>
+            <li><span>ARCAS</span><span class="v">SEDEMA + comunidades</span></li>
+          </ul>
+          La CDMX tiene <b>${DATA.filter(d=>d.grupo==='ANP · Federal').length} ANP federales</b> y <b>${DATA.filter(d=>d.grupo!=='ANP · Federal').length} áreas locales</b>.`);
+
+      case 'marco':
+        return reply(`<b>Marco jurídico del sistema de áreas protegidas de la CDMX</b>
+          <ul class="data-list" style="margin-top:10px">
+            <li><span>Constitucional</span><span class="v">CPCDMX Art. 16-A</span></li>
+            <li><span>Local</span><span class="v">LACM (18 jul 2024)</span></li>
+            <li><span>Federal</span><span class="v">LGEEPA · Art. 46</span></li>
+          </ul>
+          Las definiciones de AVA (Art. 4° fr. VI), ANP (Art. 4° fr. VII), ARCAS (Art. 152) y Programa de Manejo (Art. 4° fr. LIII) están en la <b>LACM</b>. Las categorías federales (Parque Nacional, etc.) en la <b>LGEEPA</b>. Para más detalle, consulta la pestaña <b>Marco Jurídico</b>.`);
+
+      case 'articulo':
+        const m = norm(q).match(/(?:articulo|art\.?)\s+(\d+)/);
+        const num = m ? m[1] : '';
+        const articulos = {
+          '4': 'Artículo 4° de la LACM contiene las definiciones técnicas del sistema. Fracciones relevantes: VI (AVA), VII (ANP), LIII (Programa de Manejo).',
+          '16': 'Artículo 16 de la CPCDMX, Apartado A · Medio Ambiente, mandata el establecimiento de un sistema de ANP y AVA en la Ciudad de México.',
+          '46': 'Artículo 46 de la LGEEPA establece las categorías de ANP federales: Reservas de la Biosfera (I), Parques Nacionales (III), Monumentos Naturales (IV), Áreas de Protección de Recursos Naturales (VI), Áreas de Protección de Flora y Fauna (VII), Santuarios (VIII), entre otras.',
+          '152': 'Artículo 152 de la LACM regula las Áreas Comunitarias de Conservación Ecológica (ARCAS).'
+        };
+        if(articulos[num]) return reply(`<b>Artículo ${num}</b><br><br>${articulos[num]}`);
+        return reply(`No tengo información específica sobre el artículo ${num}. Consulta la pestaña <b>Marco Jurídico</b> para revisar los textos completos de la LACM y la LGEEPA.`);
+    }
+    return null;
+  }
+
+  // ---- Handlers ----
+  function handleHelp(){
+    return reply(`Soy un asistente sobre las <b>${DATA.length} áreas protegidas</b> de la CDMX y su <b>marco jurídico</b>. Pregúntame en lenguaje natural, por ejemplo:
+      <ul class="data-list" style="margin-top:10px">
+        <li><i>"¿Cuál es la ANP más grande?"</i></li>
+        <li><i>"¿Cuál es la barranca más antigua?"</i></li>
+        <li><i>"¿Cuántas áreas hay en Coyoacán?"</i></li>
+        <li><i>"¿Qué se decretó en 2024?"</i></li>
+        <li><i>"Háblame de Tarango"</i></li>
+        <li><i>"¿Qué es un AVA?"</i></li>
+        <li><i>"¿Qué dice la LACM?"</i></li>
+        <li><i>"Categorías de ANP federales"</i></li>
+        <li><i>"Las 5 más grandes del sistema"</i></li>
+      </ul>
+      Puedes combinar filtros: <i>"barranca más grande de Álvaro Obregón"</i>.`);
+  }
+
+  function handleGreeting(){
+    return reply(`Hola, soy el asistente del Sistema de Información Ambiental. Pregúntame en lenguaje natural sobre las <b>${DATA.length} áreas protegidas</b> de la CDMX o sobre su <b>marco jurídico</b> (LACM, LGEEPA, definiciones, categorías). Por ejemplo: <i>"¿Cuál es la ANP más grande?"</i> o <i>"¿Qué es un AVA?"</i>.`);
+  }
+
+  function handleThanks(){
+    return reply(`Con gusto. Si tienes otra consulta, aquí estoy.`);
+  }
+
+  function handleBiggest(filters){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const d = [...arr].sort((a,b)=>b.superficie-a.superficie)[0];
+    return reply(`El área más grande${ctxString(filters)} es:${fmtAreaCard(d)}`);
+  }
+
+  function handleSmallest(filters){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const d = [...arr].sort((a,b)=>a.superficie-b.superficie)[0];
+    return reply(`El área más pequeña${ctxString(filters)} es:${fmtAreaCard(d)}`);
+  }
+
+  function handleOldest(filters){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const d = [...arr].sort((a,b)=>a.fecha_decreto_iso.localeCompare(b.fecha_decreto_iso))[0];
+    return reply(`El área con el decreto más antiguo${ctxString(filters)} es:${fmtAreaCard(d)}`);
+  }
+
+  function handleNewest(filters){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const d = [...arr].sort((a,b)=>b.fecha_decreto_iso.localeCompare(a.fecha_decreto_iso))[0];
+    return reply(`El área con el decreto más reciente${ctxString(filters)} es:${fmtAreaCard(d)}`);
+  }
+
+  function handleTopBiggest(filters, n=5){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const top = [...arr].sort((a,b)=>b.superficie-a.superficie).slice(0, n);
+    return reply(`Las ${top.length} áreas más grandes${ctxString(filters)}:
+      <ul class="data-list" style="margin-top:10px">
+        ${top.map((d,i)=>`<li><span style="font-weight:500">${i+1}. ${d.nombre}</span><span class="v">${fmt(d.superficie)} ha</span></li>`).join('')}
+      </ul>`);
+  }
+
+  function handleTopOldest(filters, n=5){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const top = [...arr].sort((a,b)=>a.fecha_decreto_iso.localeCompare(b.fecha_decreto_iso)).slice(0, n);
+    return reply(`Las ${top.length} áreas más antiguas${ctxString(filters)}:
+      <ul class="data-list" style="margin-top:10px">
+        ${top.map((d,i)=>`<li><span style="font-weight:500">${i+1}. ${d.nombre}</span><span class="v">${d.fecha_decreto_iso.slice(0,4)}</span></li>`).join('')}
+      </ul>`);
+  }
+
+  function handleTopNewest(filters, n=5){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const top = [...arr].sort((a,b)=>b.fecha_decreto_iso.localeCompare(a.fecha_decreto_iso)).slice(0, n);
+    return reply(`Las ${top.length} áreas más recientes${ctxString(filters)}:
+      <ul class="data-list" style="margin-top:10px">
+        ${top.map((d,i)=>`<li><span style="font-weight:500">${i+1}. ${d.nombre}</span><span class="v">${d.fecha_decreto_iso.slice(0,4)}</span></li>`).join('')}
+      </ul>`);
+  }
+
+  function handleCount(filters){
+    const arr = applyFilters(DATA, filters);
+    const totSup = sum(arr,'superficie');
+    const ctx = ctxString(filters) || ' en total';
+    return reply(`Hay <b>${arr.length} áreas</b>${ctx}, con una superficie acumulada de <b>${fmt(totSup)} ha</b>.`);
+  }
+
+  function handleTotalSurface(filters){
+    const arr = applyFilters(DATA, filters);
+    const s = sum(arr,'superficie');
+    return reply(`La superficie total${ctxString(filters)||' del sistema'} es <b>${fmt(s)} ha</b> (${(s/100).toFixed(2)} km²) en <b>${arr.length} áreas</b>.`);
+  }
+
+  function handleAverage(filters){
+    const arr = applyFilters(DATA, filters);
+    if(arr.length === 0) return reply(`No encontré áreas con esos criterios.`);
+    const avg = sum(arr,'superficie')/arr.length;
+    return reply(`La superficie promedio${ctxString(filters)||' del sistema'} es <b>${fmt(avg)} ha</b>, calculada sobre ${arr.length} áreas.`);
+  }
+
+  function handleList(filters){
+    const arr = applyFilters(DATA, filters);
+    const ctx = ctxString(filters);
+    if(arr.length === 0) return reply(`No encontré áreas que coincidan con esos criterios. Prueba reformular tu pregunta.`);
+    if(arr.length > 12){
+      const top = [...arr].sort((a,b)=>b.superficie-a.superficie).slice(0,8);
+      return reply(`Encontré <b>${arr.length} áreas</b>${ctx}. Te muestro las 8 de mayor superficie:
+        <ul class="data-list" style="margin-top:10px">
+          ${top.map(d=>`<li><span style="font-weight:500">${d.nombre}</span><span class="v">${fmt(d.superficie)} ha</span></li>`).join('')}
+        </ul>`);
+    }
+    return reply(`Encontré <b>${arr.length} ${arr.length===1?'área':'áreas'}</b>${ctx}:
+      <ul class="data-list" style="margin-top:10px">
+        ${arr.map(d=>`<li><span style="font-weight:500">${d.nombre}</span><span class="v">${fmt(d.superficie)} ha</span></li>`).join('')}
+      </ul>`);
+  }
+
+  function handleAreaInfo(d, queryHint){
+    const qn = norm(queryHint||'');
+    // Si la pregunta es sobre superficie/hectáreas específicamente
+    if(/cuant(?:as|os) hectarea|superficie|cuanta extension|que tan grande|tamano/.test(qn)){
+      return reply(`<b>${d.nombre}</b> tiene una superficie de <b>${fmt(d.superficie)} ha</b> (${(d.superficie/100).toFixed(2)} km²).${fmtAreaCard(d)}`);
+    }
+    if(/cuando (?:fue|se) decret|fecha de decreto|que ano se decret/.test(qn)){
+      return reply(`<b>${d.nombre}</b> fue decretada el <b>${d.fecha_decreto}</b>.${fmtAreaCard(d)}`);
+    }
+    if(/donde esta|en que alcaldia|ubicacion/.test(qn)){
+      return reply(`<b>${d.nombre}</b> está en <b>${d.alcaldia}</b>.${fmtAreaCard(d)}`);
+    }
+    if(/programa de manejo|tiene pm/.test(qn)){
+      return reply(`<b>${d.nombre}</b> ${d.programa_manejo==='Sí' ? 'sí cuenta con Programa de Manejo'+(d.fecha_pm_iso?', publicado el '+d.fecha_pm:''): 'no cuenta con Programa de Manejo'}.${fmtAreaCard(d)}`);
+    }
+    return reply(`Esto es lo que sé sobre <b>${d.nombre}</b>:${fmtAreaCard(d)}`);
+  }
+
+  // ---- Procesamiento principal ----
+  function process(q){
+    if(!q || !q.trim()) return reply('Pregúntame sobre las áreas protegidas.');
+
+    // 0. Intenciones jurídicas (definiciones y marco legal) — alta prioridad
+    const legalIntent = detectLegalIntent(q);
+    if(legalIntent){
+      const r = handleLegal(legalIntent, q);
+      if(r) return r;
+    }
+
+    // 1. Detección rápida: nombre específico de área
+    const namedArea = detectAreaName(q);
+    const intent = detectIntent(q);
+    const filters = detectFilters(q);
+    const hasFilters = Object.keys(filters).length > 0;
+
+    // Atajos conversacionales
+    if(intent === 'help') return handleHelp();
+    if(intent === 'greeting') return handleGreeting();
+    if(intent === 'thanks') return handleThanks();
+
+    // Si detectamos un área específica Y la pregunta no busca un superlativo (más grande/antigua/etc.)
+    // entonces es una consulta sobre esa área concreta
+    const isAggregateQ = ['biggest','smallest','oldest','newest','topBiggest','topOldest','topNewest','count','totalSurface','average'].includes(intent);
+    if(namedArea && !isAggregateQ) return handleAreaInfo(namedArea, q);
+
+    // Resto de intenciones
+    switch(intent){
+      case 'biggest':       return handleBiggest(filters);
+      case 'smallest':      return handleSmallest(filters);
+      case 'oldest':        return handleOldest(filters);
+      case 'newest':        return handleNewest(filters);
+      case 'topBiggest':    return handleTopBiggest(filters, detectN(q));
+      case 'topOldest':     return handleTopOldest(filters, detectN(q));
+      case 'topNewest':     return handleTopNewest(filters, detectN(q));
+      case 'count':         return handleCount(filters);
+      case 'totalSurface':  return handleTotalSurface(filters);
+      case 'average':       return handleAverage(filters);
+      case 'where':
+        if(namedArea) return handleAreaInfo(namedArea, q);
+        return handleList(filters);
+      case 'list':
+      default:
+        if(hasFilters) return handleList(filters);
+        if(namedArea) return handleAreaInfo(namedArea, q);
+        return reply(`No estoy seguro de qué quieres saber. Algunas preguntas que sí puedo responder:<br>
+          • <i>"¿Cuál es la ANP más grande?"</i><br>
+          • <i>"¿Cuántas barrancas hay en Tlalpan?"</i><br>
+          • <i>"Háblame de Chapultepec"</i><br>
+          • <i>"¿Qué se decretó en 2024?"</i><br>
+          También puedes escribir <b>ayuda</b> para ver todas mis capacidades.`);
+    }
+  }
+
+  // ---- UI ----
+  const fab = document.getElementById('chatFab');
+  const panel = document.getElementById('chatPanel');
+  const closeBtn = document.getElementById('chatClose');
+  const body = document.getElementById('chatBody');
+  const input = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSend');
+  const suggestions = document.getElementById('chatSuggestions');
+
+  let messageCount = 0;
+
+  function appendMessage(role, html){
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+    div.innerHTML = html;
+    body.appendChild(div);
+    body.scrollTop = body.scrollHeight;
+    messageCount++;
+  }
+
+  function send(text){
+    const t = text.trim();
+    if(!t) return;
+    appendMessage('user', t.replace(/[<>]/g, c => c==='<'?'&lt;':'&gt;'));
+    input.value = '';
+    setTimeout(() => {
+      const res = process(t);
+      appendMessage('assistant', res.html);
+    }, 200);
+  }
+
+  fab.addEventListener('click', () => {
+    panel.classList.add('open');
+    fab.style.display = 'none';
+    if(messageCount === 0){
+      appendMessage('assistant', `Hola, soy el asistente del SIA. Pregúntame <b>en lenguaje natural</b> sobre las <b>${DATA.length} áreas protegidas</b> de la CDMX. Por ejemplo: <i>"¿Cuál es la ANP más grande?"</i>, <i>"Háblame de Chapultepec"</i> o <i>"¿Cuántas barrancas hay en Álvaro Obregón?"</i>.`);
+    }
+    setTimeout(() => input.focus(), 100);
+  });
+
+  closeBtn.addEventListener('click', () => {
+    panel.classList.remove('open');
+    fab.style.display = 'flex';
+  });
+
+  sendBtn.addEventListener('click', () => send(input.value));
+  input.addEventListener('keydown', e => { if(e.key === 'Enter') send(input.value); });
+
+  document.querySelectorAll('.chat-sugg').forEach(btn => {
+    btn.addEventListener('click', () => send(btn.dataset.q));
+  });
+
+  return { process, send };
+})();
+
+buildTabs(); populateFilters(); renderDashboard(); render();
+} catch(err){
+  console.error('[Dashboard] Error al inicializar:', err);
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div style="background:#fee;border:2px solid #c33;padding:16px 24px;margin:0;font-family:system-ui,sans-serif;color:#900">'+
+    '<b>⚠ Error al cargar el inventario</b><br>'+
+    'No se pudo leer <code>data/anp_inventario.csv</code>. '+
+    'Verifica que el archivo esté en la carpeta <code>data/</code> del repositorio. '+
+    'Si abriste el archivo localmente con doble-click, debes servirlo desde un servidor web (GitHub Pages, Live Server de VSCode, o <code>python -m http.server</code>).<br>'+
+    '<small style="color:#666">Detalle técnico: '+(err && err.message ? err.message : err)+'</small>'+
+    '</div>');
+}
+})();
+</script>
+</body>
+</html>
